@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --hl-bg:#f7f9fb; --hl-rail:#edf1f6; --hl-card:#ffffff; --hl-hover:#f0f4f8;
+  --hl-text:#16232e; --hl-label:#5b7185; --hl-muted:#93a5b5; --hl-line:#e2e9f0;
+  --hl-header:rgba(247,249,251,.94); --hl-card-shadow:0 4px 15px rgba(23,42,58,.06);
+  --hl-h1:#0ea5a4; --hl-h1d:#0f766e; --hl-g1:rgba(14,165,164,.30);
+  --hl-h2:#2563eb; --hl-h2d:#1d4ed8; --hl-g2:rgba(37,99,235,.30);
+  --hl-h3:#16a34a; --hl-h3d:#15803d; --hl-g3:rgba(22,163,74,.30);
+  --hl-h4:#ea580c; --hl-h4d:#c2410c; --hl-g4:rgba(234,88,12,.30);
+  --hl-date-filter:none;
+}
+html,body{margin:0;padding:0;background:var(--hl-bg);}
+*{box-sizing:border-box;}
+a{color:var(--hl-h2);text-decoration:none;}
+a:hover{color:var(--hl-h2d);}
+input::placeholder,textarea::placeholder{color:var(--hl-muted);}
+input[type="date"]::-webkit-calendar-picker-indicator{filter:var(--hl-date-filter);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+@keyframes hlPulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.35);}50%{box-shadow:0 0 0 10px rgba(220,38,38,0);}}
+@keyframes hlConfetti{0%{transform:translateY(-5vh) rotate(0);opacity:1;}100%{transform:translateY(105vh) rotate(720deg);opacity:.5;}}
+</style>
+</helmet>
+<div style="height:100vh;display:flex;flex-direction:column;overflow:hidden;position:relative;background:var(--hl-bg);font-family:'Outfit',system-ui,sans-serif;color:var(--hl-text);">
+  <header data-screen-label="App bar" style="flex-shrink:0;z-index:50;display:flex;align-items:center;gap:28px;padding:14px 32px;background:var(--hl-header);border-bottom:1px solid var(--hl-line);">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="font-size:1.4rem;">🩺</span>
+      <span style="font-size:1.25rem;font-weight:700;background:linear-gradient(135deg,var(--hl-h3),var(--hl-h2),var(--hl-h1));-webkit-background-clip:text;background-clip:text;color:transparent;">HealthLog</span>
+    </div>
+    <nav style="display:{{ navDisplay }};gap:6px;flex:1;">
+      <sc-for list="{{ navTabs }}" as="t" hint-placeholder-count="4">
+        <button onClick="{{ t.onClick }}" style="display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:12px;border:none;cursor:pointer;font-family:inherit;font-size:0.95rem;font-weight:500;background:{{ t.bg }};color:{{ t.col }};box-shadow:{{ t.glow }};transition:all .2s ease;" style-hover="background:{{ t.hoverBg }};">
+          <span>{{ t.emoji }}</span><span>{{ t.label }}</span>
+        </button>
+      </sc-for>
+    </nav>
+    <button onClick="{{ openModal }}" style="padding:11px 20px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--hl-h3),var(--hl-h3d));color:#ffffff;font-weight:600;font-family:inherit;font-size:0.95rem;cursor:pointer;box-shadow:0 8px 24px var(--hl-g3);transition:all .2s ease;margin-left:auto;" style-hover="transform:translateY(-2px);">＋ Add Visit</button>
+  </header>
+  <main ref="{{ mainRef }}" style="flex:1;overflow-y:auto;width:100%;padding:32px;">
+  <div style="max-width:1180px;margin:0 auto;">
+
+    <sc-if value="{{ showHome }}" hint-placeholder-val="{{ true }}">
+      <div data-screen-label="Home" style="display:flex;flex-direction:column;gap:22px;animation:fadeIn .3s ease;">
+        <div>
+          <div style="font-size:1.8rem;font-weight:700;">{{ greeting }}</div>
+          <div style="color:var(--hl-label);font-size:1rem;margin-top:4px;">{{ greetingSub }}</div>
+        </div>
+        <sc-if value="{{ dueBanner }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ scrollToNow }}" style="position:sticky;top:0;z-index:5;cursor:pointer;display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#dc2626,#b91c1c);border-radius:14px;padding:14px 20px;color:#ffffff;box-shadow:0 8px 24px rgba(220,38,38,.35);">
+            <span style="font-size:1.1rem;">🔔</span>
+            <div style="flex:1;font-size:0.95rem;font-weight:600;">{{ dueText }}</div>
+            <span style="font-size:0.85rem;opacity:.9;">View ›</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ missedBanner }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:12px;background:color-mix(in srgb,#dc2626 10%,transparent);border:1px solid color-mix(in srgb,#dc2626 40%,transparent);border-radius:14px;padding:14px 20px;color:#dc2626;">
+            <span style="font-size:1.1rem;">⚠️</span>
+            <div style="flex:1;font-size:0.95rem;font-weight:600;">{{ missedText }}</div>
+          </div>
+        </sc-if>
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="flex:1;height:8px;background:var(--hl-rail);border-radius:4px;overflow:hidden;">
+            <div style="height:100%;width:{{ takenPct }}%;background:linear-gradient(90deg,var(--hl-h3),var(--hl-h1));border-radius:4px;transition:all .3s ease;"></div>
+          </div>
+          <div style="font-size:0.85rem;color:var(--hl-label);white-space:nowrap;">{{ takenSummary }} today</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));background:var(--hl-card);border:1px solid var(--hl-line);border-radius:20px;box-shadow:var(--hl-card-shadow);">
+          <div onClick="{{ goVisitsQ }}" style="flex:1;cursor:pointer;padding:20px 24px;display:flex;flex-direction:column;gap:4px;">
+            <div style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">Next Follow-up</div>
+            <div style="font-size:1.3rem;font-weight:700;">{{ fuValue }}</div>
+            <div style="font-size:0.85rem;color:var(--hl-h2);">{{ fuSub }}</div>
+          </div>
+          <div onClick="{{ goExpensesQ }}" style="flex:1;cursor:pointer;padding:20px 24px;display:flex;flex-direction:column;gap:4px;">
+            <div style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">Spent This Month</div>
+            <div style="font-size:1.3rem;font-weight:700;">{{ monthTotal }}</div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="flex:1;height:6px;background:var(--hl-rail);border-radius:3px;overflow:hidden;">
+                <div style="height:100%;width:{{ monthPct }}%;background:{{ budgetBarBg }};border-radius:3px;"></div>
+              </div>
+              <div style="font-size:0.85rem;color:var(--hl-label);white-space:nowrap;">of {{ budgetLabel }}</div>
+            </div>
+          </div>
+          <div onClick="{{ goScheduleQ }}" style="flex:1;cursor:pointer;padding:20px 24px;display:flex;flex-direction:column;gap:4px;">
+            <div style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">Active Courses</div>
+            <div style="font-size:1.3rem;font-weight:700;">{{ courseCount }}</div>
+            <div style="font-size:0.85rem;color:var(--hl-h3);">{{ courseNames }}</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1.1fr 0.9fr;gap:22px;align-items:start;">
+          <div style="background:var(--hl-card);border:1px solid var(--hl-line);border-radius:20px;padding:24px;box-shadow:var(--hl-card-shadow);display:flex;flex-direction:column;gap:14px;">
+            <div style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">💊 Your Day</div>
+            <div style="display:flex;flex-direction:column;">
+              <sc-for list="{{ timeline }}" as="s" hint-placeholder-count="4">
+                <div ref="{{ s.slotRef }}" style="display:flex;gap:14px;">
+                  <div style="display:flex;flex-direction:column;align-items:center;width:34px;flex-shrink:0;">
+                    <div style="width:34px;height:34px;border-radius:50%;background:{{ s.dotBg }};border:2px solid {{ s.dotBd }};display:flex;align-items:center;justify-content:center;font-size:0.95rem;animation:{{ s.anim }};">{{ s.emoji }}</div>
+                    <div style="flex:1;width:2px;background:{{ s.lineBg }};min-height:14px;"></div>
+                  </div>
+                  <div style="flex:1;padding-bottom:14px;min-width:0;">
+                    <div style="display:flex;align-items:baseline;gap:8px;">
+                      <div style="font-weight:700;font-size:0.95rem;color:{{ s.titleCol }};">{{ s.label }}</div>
+                      <div style="font-size:0.75rem;color:var(--hl-muted);">{{ s.time }}</div>
+                      <div style="margin-left:auto;font-size:0.72rem;font-weight:600;color:{{ s.stateCol }};">{{ s.stateLabel }}</div>
+                    </div>
+                    <sc-for list="{{ s.doses }}" as="d" hint-placeholder-count="1">
+                      <div style="display:flex;align-items:center;gap:10px;background:var(--hl-rail);border:1px solid {{ d.bd }};border-radius:14px;padding:11px 14px;margin-top:8px;">
+                        <div style="flex:1;min-width:0;">
+                          <div style="font-weight:600;font-size:0.88rem;text-decoration:{{ d.strike }};color:{{ d.col }};">{{ d.name }} <span style="font-weight:400;color:var(--hl-muted);">{{ d.dose }}</span></div>
+                          <sc-if value="{{ d.missed }}" hint-placeholder-val="{{ false }}">
+                            <div style="font-size:0.72rem;color:#dc2626;margin-top:2px;">Missed — take late or skip</div>
+                          </sc-if>
+                        </div>
+                        <sc-if value="{{ d.missed }}" hint-placeholder-val="{{ false }}">
+                          <button onClick="{{ d.onSkip }}" style="min-height:38px;padding:7px 10px;border-radius:10px;border:1px solid var(--hl-line);background:transparent;color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:0.75rem;">Skip</button>
+                        </sc-if>
+                        <button onClick="{{ d.onToggle }}" style="width:40px;height:40px;border-radius:50%;border:2px solid {{ d.cBd }};background:{{ d.cBg }};color:#ffffff;font-size:0.95rem;cursor:pointer;font-family:inherit;transition:all .2s ease;flex-shrink:0;">{{ d.check }}</button>
+                      </div>
+                    </sc-for>
+                    <sc-if value="{{ s.empty }}" hint-placeholder-val="{{ false }}">
+                      <div style="font-size:0.8rem;color:var(--hl-muted);margin-top:6px;">Nothing scheduled</div>
+                    </sc-if>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:var(--hl-card);border:1px solid var(--hl-line);border-radius:20px;padding:24px;box-shadow:var(--hl-card-shadow);display:flex;flex-direction:column;gap:12px;">
+            <div style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">🏥 Recent Visits</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <sc-for list="{{ recentVisits }}" as="v" hint-placeholder-count="3">
+                <div onClick="{{ v.onSelect }}" style="cursor:pointer;background:var(--hl-rail);border-radius:12px;padding:14px 16px;transition:all .2s ease;" style-hover="background:var(--hl-hover);">
+                  <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline;">
+                    <div style="font-weight:600;font-size:0.95rem;">{{ v.clinic }}</div>
+                    <div style="font-size:0.8rem;color:var(--hl-label);white-space:nowrap;">{{ v.dateLabel }}</div>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;gap:8px;margin-top:4px;">
+                    <div style="font-size:0.85rem;color:var(--hl-label);">{{ v.concern }}</div>
+                    <div style="font-size:0.85rem;color:var(--hl-h4);">{{ v.totalLabel }}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showVisits }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Visits" style="display:grid;grid-template-columns:370px 1fr;gap:22px;align-items:start;animation:fadeIn .3s ease;">
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;padding:0 4px;">All Visits · {{ visitCount }}</div>
+          <sc-for list="{{ visitList }}" as="v" hint-placeholder-count="4">
+            <div onClick="{{ v.onSelect }}" style="cursor:pointer;background:{{ v.bg }};border:1px solid {{ v.bd }};border-radius:20px;padding:18px 20px;transition:all .2s ease;box-shadow:{{ v.shadow }};" style-hover="border-color:var(--hl-h2);">
+              <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline;">
+                <div style="font-weight:600;font-size:1rem;">{{ v.clinic }}</div>
+                <div style="font-size:0.85rem;color:var(--hl-label);white-space:nowrap;">{{ v.dateLabel }}</div>
+              </div>
+              <div style="font-size:0.9rem;color:var(--hl-label);margin-top:4px;">{{ v.concern }}</div>
+              <div style="display:flex;gap:14px;margin-top:10px;font-size:0.8rem;color:var(--hl-muted);">
+                <span>💊 {{ v.medsLabel }}</span><span>💰 {{ v.totalLabel }}</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ hasSelected }}" hint-placeholder-val="{{ true }}">
+          <div style="background:var(--hl-card);border:1px solid var(--hl-line);border-radius:20px;padding:28px;box-shadow:var(--hl-card-shadow);position:sticky;top:0;display:flex;flex-direction:column;gap:20px;">
+            <div>
+              <div style="font-size:1.5rem;font-weight:700;">{{ selConcern }}</div>
+              <div style="color:var(--hl-label);font-size:0.95rem;margin-top:6px;">{{ selClinic }} · {{ selDoctor }} · {{ selDateLabel }}</div>
+            </div>
+            <sc-if value="{{ selNotes }}" hint-placeholder-val="{{ true }}">
+              <div style="background:var(--hl-rail);border-radius:12px;padding:16px;">
+                <div style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;margin-bottom:6px;">Notes</div>
+                <div style="font-size:0.95rem;line-height:1.5;">{{ selNotes }}</div>
+              </div>
+            </sc-if>
+            <div>
+              <div style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;margin-bottom:10px;">💊 Medicines</div>
+              <sc-if value="{{ selHasMeds }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                  <sc-for list="{{ selMeds }}" as="m" hint-placeholder-count="2">
+                    <div style="display:flex;align-items:center;gap:12px;background:var(--hl-rail);border-radius:12px;padding:12px 16px;">
+                      <div style="flex:1;">
+                        <div style="font-weight:600;font-size:0.95rem;">{{ m.name }} <span style="color:var(--hl-label);font-weight:400;">{{ m.dose }}</span></div>
+                        <div style="font-size:0.8rem;color:var(--hl-muted);">{{ m.slotsLabel }} · {{ m.daysLabel }}</div>
+                      </div>
+                      <span style="font-size:0.8rem;padding:5px 12px;border-radius:35px;background:{{ m.pillBg }};color:{{ m.pillCol }};white-space:nowrap;">{{ m.statusLabel }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <sc-if value="{{ selNoMeds }}" hint-placeholder-val="{{ false }}">
+                <div style="color:var(--hl-muted);font-size:0.9rem;">No medicines prescribed.</div>
+              </sc-if>
+            </div>
+            <div>
+              <div style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;margin-bottom:10px;">💰 Expense</div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <sc-for list="{{ selCosts }}" as="c" hint-placeholder-count="3">
+                  <div style="display:flex;justify-content:space-between;font-size:0.95rem;color:var(--hl-label);">
+                    <span>{{ c.label }}</span><span style="color:var(--hl-text);">{{ c.amt }}</span>
+                  </div>
+                </sc-for>
+                <div style="display:flex;justify-content:space-between;font-size:1.05rem;font-weight:700;border-top:1px solid var(--hl-line);padding-top:10px;margin-top:4px;">
+                  <span>Total</span><span style="color:var(--hl-h4);">{{ selTotal }}</span>
+                </div>
+              </div>
+            </div>
+            <sc-if value="{{ selFollowUp }}" hint-placeholder-val="{{ false }}">
+              <div style="display:inline-flex;align-items:center;gap:8px;align-self:flex-start;background:color-mix(in srgb,var(--hl-h4) 10%,transparent);border:1px solid color-mix(in srgb,var(--hl-h4) 40%,transparent);border-radius:35px;padding:8px 16px;font-size:0.85rem;color:var(--hl-h4);">📅 Follow-up · {{ selFollowUp }}</div>
+            </sc-if>
+            <div>
+              <button onClick="{{ deleteSelected }}" style="padding:9px 16px;border-radius:12px;border:1px solid rgba(239,68,68,.4);background:transparent;color:#ef4444;cursor:pointer;font-family:inherit;font-size:0.85rem;transition:all .2s ease;" style-hover="background:rgba(239,68,68,.1);">🗑 Delete Visit</button>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showSchedule }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Schedule" style="display:flex;flex-direction:column;gap:22px;animation:fadeIn .3s ease;">
+        <div style="display:flex;align-items:center;gap:16px;">
+          <div style="font-size:1.5rem;font-weight:700;">Today's Schedule</div>
+          <div style="color:var(--hl-label);font-size:0.95rem;">{{ todayLabel }}</div>
+          <div style="flex:1;"></div>
+          <div style="font-size:0.9rem;color:var(--hl-label);">{{ takenSummary }}</div>
+          <div style="width:160px;height:8px;background:var(--hl-rail);border-radius:4px;overflow:hidden;">
+            <div style="height:100%;width:{{ takenPct }}%;background:linear-gradient(135deg,var(--hl-h3),var(--hl-h3d));border-radius:4px;transition:all .3s ease;"></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;align-items:start;">
+          <sc-for list="{{ slotGroups }}" as="g" hint-placeholder-count="4">
+            <div style="background:var(--hl-card);border:1px solid var(--hl-line);border-radius:20px;padding:20px;box-shadow:var(--hl-card-shadow);">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:1.2rem;">{{ g.emoji }}</span>
+                <span style="font-weight:600;font-size:0.95rem;">{{ g.label }}</span>
+                <span style="font-size:0.8rem;color:var(--hl-muted);margin-left:auto;">{{ g.time }}</span>
+              </div>
+              <sc-for list="{{ g.doses }}" as="d" hint-placeholder-count="1">
+                <div style="margin-top:12px;padding:14px;background:var(--hl-rail);border-radius:12px;">
+                  <div style="font-weight:600;font-size:0.95rem;">{{ d.name }}</div>
+                  <div style="font-size:0.8rem;color:var(--hl-label);">{{ d.dose }} · {{ d.clinic }}</div>
+                  <button onClick="{{ d.onToggle }}" style="width:100%;margin-top:10px;min-height:38px;padding:8px 12px;border-radius:10px;border:1px solid {{ d.btnBd }};background:{{ d.btnBg }};color:{{ d.btnCol }};cursor:pointer;font-family:inherit;font-size:0.85rem;font-weight:500;transition:all .2s ease;">{{ d.btnLabel }}</button>
+                </div>
+              </sc-for>
+              <sc-if value="{{ g.empty }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:12px;color:var(--hl-muted);font-size:0.85rem;">No doses</div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+        <div style="background:var(--hl-card);border:1px solid var(--hl-line);border-radius:20px;padding:24px;box-shadow:var(--hl-card-shadow);">
+          <div style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;margin-bottom:6px;">💊 Active Courses</div>
+          <sc-if value="{{ hasCourses }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;">
+              <sc-for list="{{ courses }}" as="c" hint-placeholder-count="2">
+                <div style="display:flex;align-items:center;gap:20px;padding:14px 0;border-bottom:1px solid var(--hl-line);">
+                  <div style="flex:1;">
+                    <div style="font-weight:600;font-size:0.95rem;">{{ c.name }} <span style="color:var(--hl-label);font-weight:400;">{{ c.dose }}</span></div>
+                    <div style="font-size:0.8rem;color:var(--hl-muted);">{{ c.clinic }}</div>
+                  </div>
+                  <div style="font-size:0.85rem;color:var(--hl-label);white-space:nowrap;">{{ c.dayLabel }}</div>
+                  <div style="width:180px;height:8px;background:var(--hl-rail);border-radius:4px;overflow:hidden;">
+                    <div style="height:100%;width:{{ c.pct }}%;background:linear-gradient(135deg,var(--hl-h3),var(--hl-h3d));border-radius:4px;"></div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ noCourses }}" hint-placeholder-val="{{ false }}">
+            <div style="color:var(--hl-muted);font-size:0.9rem;margin-top:8px;">No active medicine courses.</div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showExpenses }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Expenses" style="display:flex;flex-direction:column;gap:22px;animation:fadeIn .3s ease;">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+          <div style="background:var(--hl-card);border:1px solid var(--hl-line);border-radius:20px;padding:22px 24px;box-shadow:var(--hl-card-shadow);display:flex;flex-direction:column;gap:8px;">
+            <div style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">This Month</div>
+            <div style="font-size:1.8rem;font-weight:700;">{{ monthTotal }}</div>
+            <div style="height:8px;background:var(--hl-rail);border-radius:4px;overflow:hidden;">
+              <div style="height:100%;width:{{ monthPct }}%;background:{{ budgetBarBg }};border-radius:4px;"></div>
+            </div>
+            <div style="font-size:0.85rem;color:var(--hl-label);">of {{ budgetLabel }} monthly budget</div>
+          </div>
+          <div style="background:var(--hl-card);border:1px solid var(--hl-line);border-radius:20px;padding:22px 24px;box-shadow:var(--hl-card-shadow);display:flex;flex-direction:column;gap:8px;">
+            <div style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">This Year</div>
+            <div style="font-size:1.8rem;font-weight:700;">{{ yearTotal }}</div>
+            <div style="font-size:0.85rem;color:var(--hl-label);">{{ yearVisits }} visits</div>
+          </div>
+          <div style="background:var(--hl-card);border:1px solid var(--hl-line);border-radius:20px;padding:22px 24px;box-shadow:var(--hl-card-shadow);display:flex;flex-direction:column;gap:8px;">
+            <div style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">Average / Visit</div>
+            <div style="font-size:1.8rem;font-weight:700;">{{ avgVisit }}</div>
+            <div style="font-size:0.85rem;color:var(--hl-label);">across all records</div>
+          </div>
+        </div>
+        <div style="background:var(--hl-card);border:1px solid var(--hl-line);border-radius:20px;padding:24px;box-shadow:var(--hl-card-shadow);">
+          <div style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;margin-bottom:18px;">📊 Monthly Spend</div>
+          <div style="display:flex;align-items:flex-end;gap:14px;height:190px;">
+            <sc-for list="{{ months }}" as="m" hint-placeholder-count="8">
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:8px;height:100%;">
+                <div style="font-size:0.75rem;color:var(--hl-label);">{{ m.amtLabel }}</div>
+                <div style="width:100%;max-width:46px;height:{{ m.hPct }}%;min-height:3px;background:linear-gradient(135deg,var(--hl-h4),var(--hl-h4d));border-radius:8px 8px 4px 4px;box-shadow:0 6px 20px var(--hl-g4);"></div>
+                <div style="font-size:0.8rem;color:var(--hl-muted);">{{ m.label }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background:var(--hl-card);border:1px solid var(--hl-line);border-radius:20px;padding:24px;box-shadow:var(--hl-card-shadow);">
+          <div style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;margin-bottom:14px;">🏥 By Clinic</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <sc-for list="{{ clinics }}" as="c" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:16px;">
+                <div style="width:220px;font-size:0.95rem;font-weight:500;">{{ c.name }}</div>
+                <div style="flex:1;height:10px;background:var(--hl-rail);border-radius:5px;overflow:hidden;">
+                  <div style="height:100%;width:{{ c.wPct }}%;background:linear-gradient(135deg,var(--hl-h2),var(--hl-h2d));border-radius:5px;"></div>
+                </div>
+                <div style="width:80px;text-align:right;font-size:0.95rem;">{{ c.amtLabel }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+  </main>
+
+  <sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeModal }}" style="position:absolute;inset:0;z-index:100;background:rgba(10,20,25,.55);display:flex;align-items:center;justify-content:center;padding:24px;">
+      <div onClick="{{ stopProp }}" data-screen-label="New Visit form" style="width:680px;max-width:100%;max-height:88vh;overflow:auto;background:var(--hl-card);border:1px solid var(--hl-line);border-radius:20px;padding:28px;display:flex;flex-direction:column;gap:20px;animation:fadeIn .25s ease;box-shadow:0 24px 80px rgba(0,0,0,.25);">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-size:1.5rem;font-weight:700;">New Visit</div>
+          <button onClick="{{ closeModal }}" style="width:38px;height:38px;border-radius:10px;border:1px solid var(--hl-line);background:transparent;color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:1rem;transition:all .2s ease;" style-hover="background:var(--hl-hover);">✗</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">Date</label>
+            <input type="date" value="{{ fDate }}" onChange="{{ onDate }}" style="width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--hl-line);background:var(--hl-rail);color:var(--hl-text);font-size:0.95rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h2);">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">Clinic</label>
+            <input type="text" value="{{ fClinic }}" onChange="{{ onClinic }}" placeholder="CityCare Family Clinic" style="width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--hl-line);background:var(--hl-rail);color:var(--hl-text);font-size:0.95rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h2);">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">Doctor</label>
+            <input type="text" value="{{ fDoctor }}" onChange="{{ onDoctor }}" placeholder="Dr. Meera Nair" style="width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--hl-line);background:var(--hl-rail);color:var(--hl-text);font-size:0.95rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h2);">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">Follow-up (optional)</label>
+            <input type="date" value="{{ fFollowUp }}" onChange="{{ onFollowUp }}" style="width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--hl-line);background:var(--hl-rail);color:var(--hl-text);font-size:0.95rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h2);">
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">Health Concern</label>
+          <input type="text" value="{{ fConcern }}" onChange="{{ onConcern }}" placeholder="e.g. Sore throat & fever" style="width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--hl-line);background:var(--hl-rail);color:var(--hl-text);font-size:0.95rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h2);">
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">Notes</label>
+          <textarea value="{{ fNotes }}" onChange="{{ onNotes }}" rows="3" placeholder="Diagnosis, advice, test results…" style="width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--hl-line);background:var(--hl-rail);color:var(--hl-text);font-size:0.95rem;font-family:inherit;outline:none;resize:vertical;" style-focus="border-color:var(--hl-h2);"></textarea>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+            <label style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">💊 Medicines</label>
+            <button onClick="{{ addMed }}" style="padding:7px 14px;border-radius:10px;border:1px solid var(--hl-line);background:transparent;color:var(--hl-h3);cursor:pointer;font-family:inherit;font-size:0.85rem;transition:all .2s ease;" style-hover="background:color-mix(in srgb,var(--hl-h3) 10%,transparent);">＋ Add Medicine</button>
+          </div>
+          <sc-for list="{{ formMeds }}" as="m" hint-placeholder-count="1">
+            <div style="background:var(--hl-rail);border-radius:12px;padding:14px;margin-top:10px;display:flex;flex-direction:column;gap:10px;">
+              <div style="display:grid;grid-template-columns:1.3fr 0.8fr 90px 38px;gap:10px;">
+                <input type="text" value="{{ m.name }}" onChange="{{ m.onName }}" placeholder="Medicine name" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-text);font-size:0.9rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h3);">
+                <input type="text" value="{{ m.dose }}" onChange="{{ m.onDose }}" placeholder="500 mg" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-text);font-size:0.9rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h3);">
+                <input type="number" value="{{ m.days }}" onChange="{{ m.onDays }}" placeholder="Days" min="1" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-text);font-size:0.9rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h3);">
+                <button onClick="{{ m.onRemove }}" style="width:38px;border-radius:10px;border:1px solid var(--hl-line);background:transparent;color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:0.9rem;transition:all .2s ease;" style-hover="color:#ef4444;border-color:rgba(239,68,68,.4);">🗑</button>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <sc-for list="{{ m.slotBtns }}" as="sb" hint-placeholder-count="4">
+                  <button onClick="{{ sb.onToggle }}" style="padding:8px 14px;border-radius:35px;border:1px solid {{ sb.bd }};background:{{ sb.bg }};color:{{ sb.col }};cursor:pointer;font-family:inherit;font-size:0.8rem;transition:all .2s ease;">{{ sb.emoji }} {{ sb.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div>
+          <label style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">💰 Expense · {{ curLabel }}</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:10px;">
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <label style="font-size:0.8rem;color:var(--hl-label);">Consultation</label>
+              <input type="number" value="{{ fConsult }}" onChange="{{ onConsult }}" placeholder="0" min="0" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--hl-line);background:var(--hl-rail);color:var(--hl-text);font-size:0.9rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h4);">
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <label style="font-size:0.8rem;color:var(--hl-label);">Medicines</label>
+              <input type="number" value="{{ fMeds }}" onChange="{{ onMeds }}" placeholder="0" min="0" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--hl-line);background:var(--hl-rail);color:var(--hl-text);font-size:0.9rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h4);">
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <label style="font-size:0.8rem;color:var(--hl-label);">Tests / Other</label>
+              <input type="number" value="{{ fOther }}" onChange="{{ onOther }}" placeholder="0" min="0" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--hl-line);background:var(--hl-rail);color:var(--hl-text);font-size:0.9rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h4);">
+            </div>
+          </div>
+        </div>
+        <sc-if value="{{ formError }}" hint-placeholder-val="{{ false }}">
+          <div style="color:#ef4444;font-size:0.9rem;">✗ {{ formError }}</div>
+        </sc-if>
+        <div style="display:flex;justify-content:flex-end;gap:10px;">
+          <button onClick="{{ closeModal }}" style="padding:11px 20px;border-radius:12px;border:1px solid var(--hl-line);background:transparent;color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:0.95rem;transition:all .2s ease;" style-hover="background:var(--hl-hover);">Cancel</button>
+          <button onClick="{{ saveVisit }}" style="padding:11px 24px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--hl-h3),var(--hl-h3d));color:#ffffff;font-weight:600;font-family:inherit;font-size:0.95rem;cursor:pointer;box-shadow:0 8px 24px var(--hl-g3);transition:all .2s ease;" style-hover="transform:translateY(-2px);">✓ Save Visit</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ narrowNav }}" hint-placeholder-val="{{ false }}">
+    <nav style="flex-shrink:0;z-index:90;display:grid;grid-template-columns:repeat(4,1fr);background:var(--hl-header);border-top:1px solid var(--hl-line);padding:8px 4px 12px 4px;">
+      <sc-for list="{{ navTabs }}" as="t" hint-placeholder-count="4">
+        <button onClick="{{ t.onClick }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;min-height:52px;padding:6px 2px;border:none;background:transparent;cursor:pointer;font-family:inherit;">
+          <span style="position:relative;">
+            <span style="font-size:1.25rem;filter:{{ t.dim }};">{{ t.emoji }}</span>
+            <sc-if value="{{ t.badge }}" hint-placeholder-val="{{ false }}">
+              <span style="position:absolute;top:-4px;right:-10px;min-width:16px;height:16px;border-radius:8px;background:#dc2626;color:#ffffff;font-size:0.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;">{{ t.badge }}</span>
+            </sc-if>
+          </span>
+          <span style="font-size:0.65rem;font-weight:600;color:{{ t.bCol }};letter-spacing:0.5px;">{{ t.label }}</span>
+        </button>
+      </sc-for>
+    </nav>
+  </sc-if>
+  <sc-if value="{{ celebrate }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:120;pointer-events:none;overflow:hidden;">
+      <sc-for list="{{ confetti }}" as="c" hint-placeholder-count="0">
+        <div style="position:absolute;left:{{ c.left }}%;top:-20px;width:8px;height:14px;border-radius:2px;background:{{ c.color }};animation:hlConfetti {{ c.dur }}s ease-in {{ c.delay }}s forwards;"></div>
+      </sc-for>
+      <div style="position:absolute;left:0;right:0;top:38%;text-align:center;font-family:'Outfit',system-ui,sans-serif;">
+        <div style="font-size:2.6rem;">🎉</div>
+        <div style="font-size:1.3rem;font-weight:700;color:var(--hl-h3);">All doses done!</div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Clinical Light&quot;,&quot;Warm Cream&quot;,&quot;Lavender Mist&quot;,&quot;Ocean Teal&quot;,&quot;Midnight&quot;],&quot;default&quot;:&quot;Clinical Light&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Appearance&quot;},&quot;currency&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;USD&quot;,&quot;INR&quot;,&quot;EUR&quot;],&quot;default&quot;:&quot;USD&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Settings&quot;},&quot;monthlyBudget&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:250,&quot;min&quot;:50,&quot;max&quot;:5000,&quot;step&quot;:50,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Settings&quot;}}">
+class Component extends DCLogic {
+  state = {
+    ready: false, tab: 'home', visits: [], taken: {}, selectedId: null, modalOpen: false, celebrate: false,
+    fDate: '', fClinic: '', fDoctor: '', fConcern: '', fNotes: '', fFollowUp: '',
+    fConsult: '', fMeds: '', fOther: '', formMeds: [], formError: ''
+  };
+  componentDidMount() {
+    this.mainRef = React.createRef();
+    this.nowRef = React.createRef();
+    this.onResize = () => this.setState({ narrow: window.innerWidth < 760 });
+    window.addEventListener('resize', this.onResize);
+    this.onResize();
+    import('./healthlog-data.js').then(m => {
+      this.M = m;
+      m.applyTheme(this.props.theme ?? 'Clinical Light');
+      const data = m.loadData();
+      const sorted = [...data.visits].sort((a, b) => a.date < b.date ? 1 : -1);
+      this.setState({ ready: true, visits: sorted, taken: data.taken || {}, selectedId: (sorted[0] || {}).id || null });
+      setTimeout(() => this.scrollToNow(), 450);
+    });
+  }
+  scrollToNow() {
+    const m = this.mainRef && this.mainRef.current, n = this.nowRef && this.nowRef.current;
+    if (m && n) m.scrollTop = Math.max(0, n.getBoundingClientRect().top - m.getBoundingClientRect().top + m.scrollTop - 90);
+  }
+  componentDidUpdate() {
+    if (this.M) this.M.applyTheme(this.props.theme ?? 'Clinical Light');
+  }
+  persist(visits, taken) {
+    if (this.M) this.M.saveData({ visits: visits || this.state.visits, taken: taken || this.state.taken });
+  }
+  emptyMed() { return { name: '', dose: '', days: '7', slots: ['morning'] }; }
+  updMed(i, patch) {
+    this.setState({ formMeds: this.state.formMeds.map((m, j) => j === i ? { ...m, ...patch } : m) });
+  }
+  renderVals() {
+    const stub = () => { };
+    if (!this.M || !this.state.ready) return { openModal: stub, stopProp: stub, navDisplay: 'flex', narrowNav: false };
+    const M = this.M, st = this.state;
+    const cur = this.props.currency ?? 'USD';
+    const budget = Number(this.props.monthlyBudget ?? 250);
+    const fmt = n => M.fmtMoney(n, cur);
+    const today = M.todayISO();
+    const year = today.slice(0, 4);
+    const visits = st.visits;
+    const takenToday = st.taken[today] || {};
+    const toggle = id => {
+      const t = { ...st.taken, [today]: { ...(st.taken[today] || {}) } };
+      t[today][id] = !t[today][id];
+      const wasDone = doses.length > 0 && doses.every(d => takenToday[d.id]);
+      const done = doses.length > 0 && doses.every(d => t[today][d.id]);
+      this.setState({ taken: t });
+      if (done && !wasDone) {
+        this.setState({ celebrate: true });
+        clearTimeout(this._ct);
+        this._ct = setTimeout(() => this.setState({ celebrate: false }), 3500);
+      }
+      this.persist(null, t);
+    };
+    const skip = id => {
+      const t = { ...st.taken, [today]: { ...(st.taken[today] || {}) } };
+      t[today][id] = 'skip';
+      this.setState({ taken: t });
+      this.persist(null, t);
+    };
+    const TABS = [
+      { key: 'home', label: 'Home', emoji: '📋', hue: 1 },
+      { key: 'visits', label: 'Visits', emoji: '🏥', hue: 2 },
+      { key: 'schedule', label: 'Schedule', emoji: '💊', hue: 3 },
+      { key: 'expenses', label: 'Expenses', emoji: '💰', hue: 4 }
+    ];
+    const navTabs = TABS.map(t => {
+      const active = st.tab === t.key;
+      const grad = `linear-gradient(135deg,var(--hl-h${t.hue}),var(--hl-h${t.hue}d))`;
+      return {
+        ...t,
+        bg: active ? grad : 'transparent',
+        col: active ? '#ffffff' : 'var(--hl-label)',
+        glow: active ? `0 8px 24px var(--hl-g${t.hue})` : 'none',
+        hoverBg: active ? grad : 'var(--hl-hover)',
+        bCol: active ? `var(--hl-h${t.hue})` : 'var(--hl-muted)',
+        dim: active ? 'none' : 'grayscale(1) opacity(.5)',
+        onClick: () => this.setState({ tab: t.key })
+      };
+    });
+    const courses = M.activeCourses(visits, today);
+    const doses = M.dosesForDate(visits, today);
+    const slotMeta = {};
+    M.SLOTS.forEach(s => slotMeta[s.key] = s);
+    const doseVM = d => {
+      const tk = !!takenToday[d.id];
+      return {
+        ...d, slotEmoji: slotMeta[d.slot].emoji, slotLabel: slotMeta[d.slot].label,
+        btnLabel: tk ? '✓ Taken' : 'Take',
+        btnBg: tk ? 'linear-gradient(135deg,var(--hl-h3),var(--hl-h3d))' : 'transparent',
+        btnCol: tk ? '#ffffff' : 'var(--hl-label)',
+        btnBd: tk ? 'transparent' : 'var(--hl-line)',
+        onToggle: () => toggle(d.id)
+      };
+    };
+    const takenCount = doses.filter(d => takenToday[d.id]).length;
+    const takenPct = doses.length ? Math.round(takenCount / doses.length * 100) : 100;
+    const nextDose = doses.find(d => !takenToday[d.id]);
+    const slotHour = { morning: 8, noon: 13, evening: 18, night: 21 };
+    const hourNow = new Date().getHours();
+    const dueDoses = doses.filter(d => !takenToday[d.id] && hourNow >= slotHour[d.slot] - 1 && hourNow <= slotHour[d.slot] + 2);
+    const missedDoses = doses.filter(d => !takenToday[d.id] && hourNow > slotHour[d.slot] + 2);
+    const remaining = doses.filter(d => !takenToday[d.id]).length;
+    navTabs.forEach(t => { t.badge = (t.key === 'schedule' && remaining > 0) ? String(remaining) : false; });
+    const timeline = M.SLOTS.map(s => {
+      const ds = doses.filter(d => d.slot === s.key);
+      const slotDone = ds.length > 0 && ds.every(d => takenToday[d.id]);
+      const isPast = hourNow > slotHour[s.key] + 2;
+      const isNow = ds.some(d => dueDoses.indexOf(d) >= 0);
+      const hasMissed = ds.some(d => missedDoses.indexOf(d) >= 0);
+      return {
+        emoji: s.emoji, label: s.label, time: s.time,
+        slotRef: isNow ? this.nowRef : undefined,
+        anim: isNow ? 'hlPulse 1.6s ease infinite' : 'none',
+        dotBg: slotDone ? 'color-mix(in srgb,var(--hl-h3) 15%,transparent)' : isNow ? 'color-mix(in srgb,#dc2626 12%,transparent)' : 'var(--hl-card)',
+        dotBd: slotDone ? 'var(--hl-h3)' : isNow ? '#dc2626' : 'var(--hl-line)',
+        lineBg: slotDone ? 'var(--hl-h3)' : 'var(--hl-line)',
+        titleCol: isNow ? '#dc2626' : 'var(--hl-text)',
+        stateLabel: ds.length === 0 ? '' : slotDone ? '✓ DONE' : isNow ? '● NOW' : hasMissed ? 'MISSED' : isPast ? '' : 'UPCOMING',
+        stateCol: slotDone ? 'var(--hl-h3)' : (isNow || hasMissed) ? '#dc2626' : 'var(--hl-muted)',
+        empty: ds.length === 0,
+        doses: ds.map(d => {
+          const tv = takenToday[d.id];
+          const tk = !!tv;
+          const missed = missedDoses.indexOf(d) >= 0;
+          return {
+            name: d.name, dose: d.dose,
+            strike: tk ? 'line-through' : 'none',
+            col: tk ? 'var(--hl-muted)' : 'var(--hl-text)',
+            bd: missed ? 'color-mix(in srgb,#dc2626 40%,transparent)' : 'transparent',
+            cBg: tv === 'skip' ? 'var(--hl-muted)' : tk ? 'linear-gradient(135deg,var(--hl-h3),var(--hl-h3d))' : 'transparent',
+            cBd: tk ? 'transparent' : 'var(--hl-muted)',
+            check: tv === 'skip' ? '–' : tk ? '✓' : '',
+            missed, onSkip: () => skip(d.id),
+            onToggle: () => toggle(d.id)
+          };
+        })
+      };
+    });
+    const yearVisitsArr = visits.filter(v => v.date.slice(0, 4) === year);
+    const yearTotalN = yearVisitsArr.reduce((s, v) => s + M.visitTotal(v), 0);
+    const months = M.monthlyTotals(visits, 8);
+    const monthTotalN = months[months.length - 1].total;
+    const nextFU = visits.filter(v => v.followUp && v.followUp >= today).sort((a, b) => a.followUp < b.followUp ? -1 : 1)[0];
+    const hour = new Date().getHours();
+    const greeting = hour < 12 ? 'Good morning ☀️' : hour < 17 ? 'Good afternoon 🌤️' : 'Good evening 🌙';
+    const selectVisit = id => this.setState({ tab: 'visits', selectedId: id });
+    const quickActions = [
+      { emoji: '＋', label: 'Add Visit', sub: 'Record a new visit', hue: 'var(--hl-h3)', onClick: () => this.openModal() },
+      { emoji: '💊', label: 'Schedule', sub: doses.length + ' doses today', hue: 'var(--hl-h1)', onClick: () => this.setState({ tab: 'schedule' }) },
+      { emoji: '🏥', label: 'Visit History', sub: visits.length + ' records', hue: 'var(--hl-h2)', onClick: () => this.setState({ tab: 'visits' }) },
+      { emoji: '💰', label: 'Expenses', sub: fmt(yearTotalN) + ' this year', hue: 'var(--hl-h4)', onClick: () => this.setState({ tab: 'expenses' }) }
+    ];
+    const visitList = visits.map(v => {
+      const selected = v.id === st.selectedId;
+      return {
+        clinic: v.clinic, concern: v.concern,
+        dateLabel: M.fmtDateShort(v.date),
+        medsLabel: (v.meds || []).length ? (v.meds.length + (v.meds.length > 1 ? ' meds' : ' med')) : 'No meds',
+        totalLabel: fmt(M.visitTotal(v)),
+        bg: selected ? 'var(--hl-hover)' : 'var(--hl-card)',
+        bd: selected ? 'var(--hl-h2)' : 'var(--hl-line)',
+        shadow: selected ? '0 8px 24px var(--hl-g2)' : 'var(--hl-card-shadow)',
+        onSelect: () => selectVisit(v.id)
+      };
+    });
+    const sel = visits.find(v => v.id === st.selectedId);
+    let selVals = { hasSelected: false };
+    if (sel) {
+      const selMeds = (sel.meds || []).map(med => {
+        const r = M.medRange(sel, med);
+        const active = r.start <= today && today <= r.end;
+        const left = Math.round((new Date(r.end) - new Date(today)) / 86400000);
+        return {
+          name: med.name, dose: med.dose,
+          slotsLabel: (med.slots || []).map(s => slotMeta[s].label).join(' · '),
+          daysLabel: med.days + ' days',
+          statusLabel: active ? ('● Active · ' + (left === 0 ? 'last day' : left + 'd left')) : 'Completed',
+          pillBg: active ? 'color-mix(in srgb,var(--hl-h3) 14%,transparent)' : 'var(--hl-hover)',
+          pillCol: active ? 'var(--hl-h3)' : 'var(--hl-muted)'
+        };
+      });
+      const c = sel.costs || {};
+      selVals = {
+        hasSelected: true,
+        selConcern: sel.concern, selClinic: sel.clinic,
+        selDoctor: sel.doctor || '—', selDateLabel: M.fmtDate(sel.date),
+        selNotes: sel.notes || false,
+        selMeds, selHasMeds: selMeds.length > 0, selNoMeds: selMeds.length === 0,
+        selCosts: [
+          { label: 'Consultation', amt: fmt(c.consult || 0) },
+          { label: 'Medicines', amt: fmt(c.meds || 0) },
+          { label: 'Tests / Other', amt: fmt(c.other || 0) }
+        ],
+        selTotal: fmt(M.visitTotal(sel)),
+        selFollowUp: sel.followUp ? M.fmtDate(sel.followUp) : false,
+        deleteSelected: () => {
+          const rest = st.visits.filter(v => v.id !== sel.id);
+          this.setState({ visits: rest, selectedId: (rest[0] || {}).id || null });
+          this.persist(rest, null);
+        }
+      };
+    }
+    const slotGroups = M.SLOTS.map(s => {
+      const ds = doses.filter(d => d.slot === s.key).map(doseVM);
+      return { ...s, doses: ds, empty: ds.length === 0 };
+    });
+    const coursesVM = courses.map(c => ({
+      name: c.med.name, dose: c.med.dose, clinic: c.clinic,
+      dayLabel: 'Day ' + c.dayNum + ' of ' + c.days, pct: c.pct
+    }));
+    const maxMonth = Math.max(...months.map(m => m.total), 1);
+    const clinicsArr = M.clinicTotals(visits);
+    const maxClinic = Math.max(...clinicsArr.map(c => c.total), 1);
+    const formMedsVM = st.formMeds.map((m, i) => ({
+      name: m.name, dose: m.dose, days: m.days,
+      onName: e => this.updMed(i, { name: e.target.value }),
+      onDose: e => this.updMed(i, { dose: e.target.value }),
+      onDays: e => this.updMed(i, { days: e.target.value }),
+      onRemove: () => this.setState({ formMeds: st.formMeds.filter((x, j) => j !== i) }),
+      slotBtns: M.SLOTS.map(s => {
+        const on = m.slots.includes(s.key);
+        return {
+          label: s.label, emoji: s.emoji,
+          bg: on ? 'linear-gradient(135deg,var(--hl-h3),var(--hl-h3d))' : 'transparent',
+          col: on ? '#ffffff' : 'var(--hl-label)',
+          bd: on ? 'transparent' : 'var(--hl-line)',
+          onToggle: () => this.updMed(i, { slots: on ? m.slots.filter(k => k !== s.key) : [...m.slots, s.key] })
+        };
+      })
+    }));
+    return {
+      showHome: st.tab === 'home', showVisits: st.tab === 'visits',
+      showSchedule: st.tab === 'schedule', showExpenses: st.tab === 'expenses',
+      navTabs, quickActions, timeline,
+      navDisplay: st.narrow ? 'none' : 'flex',
+      narrowNav: !!st.narrow,
+      dueBanner: dueDoses.length > 0,
+      dueText: dueDoses.length === 1 ? (dueDoses[0].name + ' ' + dueDoses[0].dose + ' is due now') : (dueDoses.length + ' doses are due now'),
+      scrollToNow: () => this.scrollToNow(),
+      missedBanner: missedDoses.length > 0,
+      missedText: missedDoses.length === 1 ? ('You missed ' + missedDoses[0].name + ' — take late or skip below') : ('You missed ' + missedDoses.length + ' doses — take late or skip below'),
+      celebrate: !!st.celebrate,
+      confetti: st.celebrate ? Array.from({ length: 30 }, (x, i) => ({ left: (i * 137) % 100, color: ['#16a34a', '#2563eb', '#ea580c', '#dc2626', '#0ea5a4'][i % 5], dur: 2 + (i % 5) * 0.35, delay: (i % 7) * 0.12 })) : [],
+      mainRef: this.mainRef,
+      goVisitsQ: () => this.setState({ tab: 'visits' }),
+      goExpensesQ: () => this.setState({ tab: 'expenses' }),
+      goScheduleQ: () => this.setState({ tab: 'schedule' }),
+      greeting,
+      greetingSub: new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) + ' · here\u2019s your health at a glance',
+      hasNext: !!nextDose,
+      allDone: !nextDose,
+      doneTitle: doses.length ? 'All doses taken today' : 'No doses scheduled today',
+      doneSub: doses.length ? 'Nice work staying on track.' : 'Enjoy your medicine-free day.',
+      nextEmoji: nextDose ? slotMeta[nextDose.slot].emoji : '',
+      nextSlotLabel: nextDose ? slotMeta[nextDose.slot].label : '',
+      nextTime: nextDose ? '· ' + slotMeta[nextDose.slot].time : '',
+      nextName: nextDose ? nextDose.name : '',
+      nextDoseAmt: nextDose ? nextDose.dose : '',
+      nextClinic: nextDose ? 'Prescribed by ' + nextDose.clinic : '',
+      takeNext: () => nextDose && toggle(nextDose.id),
+      ringBgHero: `conic-gradient(#ffffff ${takenPct * 3.6}deg, rgba(255,255,255,.25) 0deg)`,
+      takenPct,
+      fuValue: nextFU ? M.fmtDateShort(nextFU.followUp) : '—',
+      fuSub: nextFU ? nextFU.clinic : 'None scheduled',
+      courseCount: String(courses.length),
+      courseNames: courses.length ? courses.map(c => c.med.name).join(' · ') : 'No active courses',
+      todayDoses: doses.map(doseVM),
+      hasDosesToday: doses.length > 0, noDosesToday: doses.length === 0,
+      takenSummary: takenCount + ' of ' + doses.length + ' taken',
+      todayLabel: M.fmtDate(today),
+      recentVisits: visits.slice(0, 3).map(v => ({
+        clinic: v.clinic, concern: v.concern, dateLabel: M.fmtDateShort(v.date),
+        totalLabel: fmt(M.visitTotal(v)), onSelect: () => selectVisit(v.id)
+      })),
+      visitCount: visits.length, visitList,
+      ...selVals,
+      slotGroups, courses: coursesVM,
+      hasCourses: coursesVM.length > 0, noCourses: coursesVM.length === 0,
+      monthTotal: fmt(monthTotalN), yearTotal: fmt(yearTotalN), yearVisits: yearVisitsArr.length,
+      avgVisit: fmt(visits.length ? Math.round(visits.reduce((s, v) => s + M.visitTotal(v), 0) / visits.length) : 0),
+      monthPct: Math.min(100, Math.round(monthTotalN / budget * 100)),
+      budgetBarBg: monthTotalN > budget ? 'linear-gradient(135deg,#ef4444,#dc2626)' : 'linear-gradient(135deg,var(--hl-h3),var(--hl-h3d))',
+      budgetLabel: fmt(budget),
+      months: months.map(m => ({
+        label: m.label, amtLabel: m.total > 0 ? fmt(m.total) : '',
+        hPct: Math.round(m.total / maxMonth * 88)
+      })),
+      clinics: clinicsArr.map(c => ({
+        name: c.name, amtLabel: fmt(c.total),
+        wPct: Math.round(c.total / maxClinic * 100)
+      })),
+      modalOpen: st.modalOpen,
+      openModal: () => this.openModal(),
+      closeModal: () => this.setState({ modalOpen: false }),
+      stopProp: e => e.stopPropagation(),
+      fDate: st.fDate, fClinic: st.fClinic, fDoctor: st.fDoctor, fConcern: st.fConcern,
+      fNotes: st.fNotes, fFollowUp: st.fFollowUp, fConsult: st.fConsult, fMeds: st.fMeds, fOther: st.fOther,
+      onDate: e => this.setState({ fDate: e.target.value }),
+      onClinic: e => this.setState({ fClinic: e.target.value }),
+      onDoctor: e => this.setState({ fDoctor: e.target.value }),
+      onConcern: e => this.setState({ fConcern: e.target.value }),
+      onNotes: e => this.setState({ fNotes: e.target.value }),
+      onFollowUp: e => this.setState({ fFollowUp: e.target.value }),
+      onConsult: e => this.setState({ fConsult: e.target.value }),
+      onMeds: e => this.setState({ fMeds: e.target.value }),
+      onOther: e => this.setState({ fOther: e.target.value }),
+      formMeds: formMedsVM,
+      addMed: () => this.setState({ formMeds: [...st.formMeds, this.emptyMed()] }),
+      formError: st.formError || false,
+      curLabel: cur,
+      saveVisit: () => {
+        if (!st.fClinic.trim() || !st.fConcern.trim() || !st.fDate) {
+          this.setState({ formError: 'Date, clinic and health concern are required.' });
+          return;
+        }
+        const nv = {
+          id: 'v' + Date.now(), date: st.fDate, clinic: st.fClinic.trim(),
+          doctor: st.fDoctor.trim(), concern: st.fConcern.trim(), notes: st.fNotes.trim(),
+          followUp: st.fFollowUp || '',
+          meds: st.formMeds.filter(m => m.name.trim()).map(m => ({
+            name: m.name.trim(), dose: m.dose.trim(),
+            slots: m.slots.length ? m.slots : ['morning'],
+            days: Math.max(1, +m.days || 1)
+          })),
+          costs: { consult: +st.fConsult || 0, meds: +st.fMeds || 0, other: +st.fOther || 0 }
+        };
+        const arr = [nv, ...st.visits].sort((a, b) => a.date < b.date ? 1 : -1);
+        this.setState({ visits: arr, modalOpen: false, selectedId: nv.id, tab: 'visits' });
+        this.persist(arr, null);
+      }
+    };
+  }
+  openModal() {
+    this.setState({
+      modalOpen: true, formError: '',
+      fDate: this.M ? this.M.todayISO() : '', fClinic: '', fDoctor: '', fConcern: '', fNotes: '', fFollowUp: '',
+      fConsult: '', fMeds: '', fOther: '', formMeds: [this.emptyMed()]
+    });
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HealthLog</title>
+<script>
+// Route phones to the mobile app, everything else to desktop
+var target = window.matchMedia('(max-width: 700px)').matches
+  ? 'HealthLog Mobile v2.dc.html'
+  : 'HealthLog Desktop v2.dc.html';
+location.replace(encodeURI(target));
+</script>
+</head>
+<body>
+<p style="font-family:system-ui;padding:24px;">Opening HealthLog…
+<a href="HealthLog%20Desktop%20v2.dc.html">Desktop</a> ·
+<a href="HealthLog%20Mobile%20v2.dc.html">Mobile</a></p>
+</body>
+</html>
