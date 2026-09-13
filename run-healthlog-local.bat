@@ -5,7 +5,7 @@ REM and double-click it. Leave this window open while using the app.
 cd /d "%~dp0"
 
 set "ROOT=."
-set "PORT=5182"
+set "PORT=5172"
 if not exist "%ROOT%\index.html" (
   echo Could not find index.html here.
   echo Put this .bat in the same folder as HealthLog's index.html

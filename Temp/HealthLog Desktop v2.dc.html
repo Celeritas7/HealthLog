@@ -29,24 +29,23 @@ input::placeholder,textarea::placeholder{color:var(--hl-muted);}
 input[type="date"]::-webkit-calendar-picker-indicator{filter:var(--hl-date-filter);}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
 @keyframes hlPulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.35);}50%{box-shadow:0 0 0 10px rgba(220,38,38,0);}}
-@keyframes hlSpin{to{transform:rotate(360deg);}}
 @keyframes hlConfetti{0%{transform:translateY(-5vh) rotate(0);opacity:1;}100%{transform:translateY(105vh) rotate(720deg);opacity:.5;}}
 </style>
 </helmet>
 <div style="height:100vh;display:flex;flex-direction:column;overflow:hidden;position:relative;background:var(--hl-bg);font-family:'Outfit',system-ui,sans-serif;color:var(--hl-text);">
-  <header data-screen-label="App bar" style="flex-shrink:0;z-index:50;display:flex;align-items:center;flex-wrap:wrap;gap:20px;row-gap:10px;padding:14px 32px;background:var(--hl-header);border-bottom:1px solid var(--hl-line);">
+  <header data-screen-label="App bar" style="flex-shrink:0;z-index:50;display:flex;align-items:center;gap:28px;padding:14px 32px;background:var(--hl-header);border-bottom:1px solid var(--hl-line);">
     <div style="display:flex;align-items:center;gap:10px;">
       <span style="font-size:1.4rem;">🩺</span>
       <span style="font-size:1.25rem;font-weight:700;background:linear-gradient(135deg,var(--hl-h3),var(--hl-h2),var(--hl-h1));-webkit-background-clip:text;background-clip:text;color:transparent;">HealthLog</span>
     </div>
-    <nav style="display:{{ navDisplay }};gap:4px;flex:1 1 auto;min-width:0;flex-wrap:wrap;align-items:center;row-gap:6px;">
+    <nav style="display:{{ navDisplay }};gap:6px;flex:1;">
       <sc-for list="{{ navTabs }}" as="t" hint-placeholder-count="4">
-        <button onClick="{{ t.onClick }}" title="{{ t.label }}" style="display:flex;align-items:center;gap:6px;padding:10px 12px;border-radius:12px;border:none;cursor:pointer;font-family:inherit;font-size:0.95rem;font-weight:500;white-space:nowrap;flex-shrink:0;background:{{ t.bg }};color:{{ t.col }};box-shadow:{{ t.glow }};transition:all .2s ease;" style-hover="background:{{ t.hoverBg }};">
-          <span style="flex-shrink:0;">{{ t.emoji }}</span><span>{{ t.label }}</span>
+        <button onClick="{{ t.onClick }}" style="display:flex;align-items:center;gap:8px;padding:10px 18px;border-radius:12px;border:none;cursor:pointer;font-family:inherit;font-size:0.95rem;font-weight:500;background:{{ t.bg }};color:{{ t.col }};box-shadow:{{ t.glow }};transition:all .2s ease;" style-hover="background:{{ t.hoverBg }};">
+          <span>{{ t.emoji }}</span><span>{{ t.label }}</span>
         </button>
       </sc-for>
     </nav>
-    <button onClick="{{ openModal }}" style="flex-shrink:0;white-space:nowrap;padding:11px 20px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--hl-h3),var(--hl-h3d));color:#ffffff;font-weight:600;font-family:inherit;font-size:0.95rem;cursor:pointer;box-shadow:0 8px 24px var(--hl-g3);transition:all .2s ease;margin-left:auto;" style-hover="transform:translateY(-2px);">＋ Add Visit</button>
+    <button onClick="{{ openModal }}" style="padding:11px 20px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--hl-h3),var(--hl-h3d));color:#ffffff;font-weight:600;font-family:inherit;font-size:0.95rem;cursor:pointer;box-shadow:0 8px 24px var(--hl-g3);transition:all .2s ease;margin-left:auto;" style-hover="transform:translateY(-2px);">＋ Add Visit</button>
   </header>
   <main ref="{{ mainRef }}" style="flex:1;overflow-y:auto;width:100%;padding:32px;">
   <div style="max-width:1180px;margin:0 auto;">
@@ -226,123 +225,6 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:var(--hl-date-filte
             </div>
           </div>
         </sc-if>
-      </div>
-    </sc-if>
-
-    <sc-if value="{{ showToday }}" hint-placeholder-val="{{ false }}">
-      <div data-screen-label="Today" style="display:flex;flex-direction:column;gap:14px;animation:fadeIn .3s ease;background:{{ tBg }};border-radius:18px;padding:20px 22px;max-width:760px;">
-
-        <div style="display:flex;align-items:center;gap:8px;">
-          <button onClick="{{ tPrevDay }}" style="min-width:44px;min-height:44px;border-radius:50%;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:1.15rem;line-height:1;">‹</button>
-          <div style="flex:1;text-align:center;min-width:0;">
-            <div style="font-size:1.2rem;font-weight:700;letter-spacing:-0.01em;">{{ tDateLabel }}</div>
-            <div style="font-size:0.74rem;color:var(--hl-label);margin-top:1px;">{{ tDateSub }}</div>
-          </div>
-          <button onClick="{{ tNextDay }}" style="min-width:44px;min-height:44px;border-radius:50%;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:1.15rem;line-height:1;opacity:{{ tNextDim }};">›</button>
-        </div>
-
-        <sc-if value="{{ tIsPast }}" hint-placeholder-val="{{ false }}">
-          <button onClick="{{ tBackToday }}" style="align-self:center;min-height:38px;padding:8px 16px;border-radius:35px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-h2);cursor:pointer;font-family:inherit;font-size:0.78rem;font-weight:600;">Back to today</button>
-        </sc-if>
-
-        <div style="display:flex;align-items:center;gap:8px;">
-          <div style="flex:1;height:6px;background:var(--hl-line);border-radius:3px;overflow:hidden;">
-            <div style="height:100%;width:{{ tPct }}%;background:linear-gradient(90deg,var(--hl-h3),var(--hl-h1));border-radius:3px;transition:width .3s ease;"></div>
-          </div>
-          <span style="font-size:0.78rem;font-weight:600;color:var(--hl-label);flex-shrink:0;">{{ tCount }}</span>
-        </div>
-
-        <sc-if value="{{ tShowBulk }}" hint-placeholder-val="{{ false }}">
-          <div style="background:var(--hl-card);border:1px solid var(--hl-line);border-radius:16px;padding:14px 15px;box-shadow:var(--hl-card-shadow);">
-            <div style="font-size:0.86rem;font-weight:600;">Catch up on earlier doses?</div>
-            <div style="font-size:0.75rem;color:var(--hl-label);margin-top:3px;line-height:1.5;">{{ tBulkSub }}</div>
-            <div style="display:flex;gap:8px;margin-top:11px;">
-              <button onClick="{{ tRunBulk }}" style="flex:1;min-height:42px;border-radius:35px;border:none;background:linear-gradient(135deg,var(--hl-h3),var(--hl-h3d));color:#ffffff;cursor:pointer;font-family:inherit;font-size:0.8rem;font-weight:600;">{{ tBulkLabel }}</button>
-              <button onClick="{{ tSkipBulk }}" style="min-height:42px;padding:0 15px;border-radius:35px;border:1px solid var(--hl-line);background:transparent;color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:0.8rem;font-weight:600;white-space:nowrap;">Not now</button>
-            </div>
-          </div>
-        </sc-if>
-
-        <div style="display:flex;flex-direction:column;gap:9px;">
-          <sc-for list="{{ tAlerts }}" as="a" hint-placeholder-count="2">
-            <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;background:{{ a.bg }};border:1px solid {{ a.bd }};">
-              <span style="font-size:1.1rem;flex-shrink:0;">{{ a.icon }}</span>
-              <div style="flex:1;min-width:0;">
-                <div style="font-size:0.81rem;font-weight:600;color:{{ a.col }};">{{ a.title }}</div>
-                <div style="font-size:0.72rem;color:var(--hl-label);margin-top:2px;">{{ a.sub }}</div>
-              </div>
-              <button onClick="{{ a.onDismiss }}" style="flex-shrink:0;min-width:44px;min-height:44px;border:none;background:transparent;color:{{ a.col }};cursor:pointer;font-family:inherit;font-size:1rem;opacity:0.65;">✕</button>
-            </div>
-          </sc-for>
-        </div>
-
-        <sc-if value="{{ tEmpty }}" hint-placeholder-val="{{ false }}">
-          <div style="text-align:center;padding:34px 18px;background:var(--hl-card);border:1px dashed var(--hl-line);border-radius:18px;">
-            <div style="font-size:1.6rem;">🌤️</div>
-            <div style="font-size:0.9rem;font-weight:600;margin-top:8px;">Nothing due</div>
-            <div style="font-size:0.76rem;color:var(--hl-label);margin-top:4px;line-height:1.5;">No medicine is scheduled for this day.</div>
-          </div>
-        </sc-if>
-
-        <div style="display:flex;flex-direction:column;gap:20px;margin-top:4px;">
-          <sc-for list="{{ tBlocks }}" as="g" hint-placeholder-count="3">
-            <div>
-              <div onClick="{{ g.onToggle }}" style="cursor:pointer;display:flex;align-items:center;gap:9px;padding-bottom:9px;border-bottom:2px solid {{ g.lineCol }};">
-                <span style="font-size:1.35rem;font-weight:700;letter-spacing:-0.02em;color:{{ g.timeCol }};">{{ g.clock }}</span>
-                <span style="font-size:0.78rem;font-weight:600;color:var(--hl-muted);align-self:flex-end;padding-bottom:3px;">{{ g.ampm }}</span>
-                <span style="margin-left:auto;font-size:0.66rem;font-weight:700;letter-spacing:0.07em;padding:4px 10px;border-radius:35px;background:{{ g.pillBg }};color:{{ g.pillCol }};">{{ g.pill }}</span>
-              </div>
-              <sc-if value="{{ g.isShut }}" hint-placeholder-val="{{ false }}">
-                <div onClick="{{ g.onToggle }}" style="cursor:pointer;font-size:0.79rem;font-weight:600;color:{{ g.shutCol }};padding:9px 2px 0 2px;">{{ g.shutLabel }}</div>
-              </sc-if>
-              <sc-if value="{{ g.isOpen }}" hint-placeholder-val="{{ true }}">
-                <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
-                  <sc-for list="{{ g.items }}" as="d" hint-placeholder-count="2">
-                    <div onPointerDown="{{ d.onDown }}" onPointerUp="{{ d.onUp }}" onPointerLeave="{{ d.onLeave }}" style="cursor:pointer;user-select:none;display:flex;align-items:center;gap:13px;background:{{ d.cardBg }};border:1px solid {{ d.cardBd }};border-radius:18px;padding:14px 15px;box-shadow:var(--hl-card-shadow);animation:{{ d.anim }};">
-                      <div style="width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:700;background:{{ d.boxBg }};border:2px solid {{ d.boxBd }};color:#ffffff;">{{ d.boxMark }}</div>
-                      <div style="flex:1;min-width:0;">
-                        <div style="font-size:0.93rem;font-weight:600;color:{{ d.nameCol }};text-decoration:{{ d.deco }};">{{ d.name }}</div>
-                        <div style="font-size:0.74rem;color:var(--hl-muted);margin-top:3px;">{{ d.note }}</div>
-                      </div>
-                      <span style="font-size:0.66rem;color:var(--hl-muted);flex-shrink:0;text-align:right;max-width:74px;line-height:1.3;">{{ d.hint }}</span>
-                    </div>
-                  </sc-for>
-                </div>
-              </sc-if>
-            </div>
-          </sc-for>
-        </div>
-
-        <div style="background:var(--hl-card);border:1px solid var(--hl-line);border-radius:18px;padding:14px 13px;box-shadow:var(--hl-card-shadow);margin-top:6px;">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <button onClick="{{ calPrev }}" style="min-width:38px;min-height:38px;border-radius:50%;border:1px solid var(--hl-line);background:transparent;color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:1rem;line-height:1;">‹</button>
-            <div style="flex:1;text-align:center;font-size:0.88rem;font-weight:600;">{{ calTitle }}</div>
-            <button onClick="{{ calNext }}" style="min-width:38px;min-height:38px;border-radius:50%;border:1px solid var(--hl-line);background:transparent;color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:1rem;line-height:1;">›</button>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:10px;">
-            <sc-for list="{{ calWeekdays }}" as="w" hint-placeholder-count="7">
-              <div style="text-align:center;font-size:0.66rem;font-weight:700;color:var(--hl-muted);padding-bottom:4px;">{{ w.label }}</div>
-            </sc-for>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;">
-            <sc-for list="{{ calCells }}" as="c" hint-placeholder-count="35">
-              <div onClick="{{ c.onPick }}" style="cursor:pointer;min-height:42px;border-radius:10px;background:{{ c.cellBg }};border:1px solid {{ c.cellBd }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:4px 2px;">
-                <span style="font-size:0.72rem;font-weight:600;color:{{ c.numCol }};line-height:1;">{{ c.dayLabel }}</span>
-                <div style="display:flex;align-items:center;gap:2px;height:6px;">
-                  <sc-for list="{{ c.dotVMs }}" as="dt" hint-placeholder-count="0">
-                    <span style="width:5px;height:5px;border-radius:50%;background:{{ dt.bg }};border:1px solid {{ dt.bd }};"></span>
-                  </sc-for>
-                  <span style="font-size:0.56rem;font-weight:700;color:var(--hl-muted);line-height:1;">{{ c.overflowLabel }}</span>
-                </div>
-              </div>
-            </sc-for>
-          </div>
-          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:11px;padding-top:10px;border-top:1px solid var(--hl-line);">
-            <span style="display:flex;align-items:center;gap:5px;font-size:0.68rem;color:var(--hl-label);"><span style="width:6px;height:6px;border-radius:50%;background:var(--hl-h3);"></span>taken</span>
-            <span style="display:flex;align-items:center;gap:5px;font-size:0.68rem;color:var(--hl-label);"><span style="width:6px;height:6px;border-radius:50%;background:#dc2626;"></span>missed</span>
-            <span style="display:flex;align-items:center;gap:5px;font-size:0.68rem;color:var(--hl-label);"><span style="width:6px;height:6px;border-radius:50%;border:1px solid var(--hl-line);"></span>upcoming</span>
-          </div>
-        </div>
       </div>
     </sc-if>
 
@@ -539,7 +421,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:var(--hl-date-filte
     </div>
   </sc-if>
   <sc-if value="{{ narrowNav }}" hint-placeholder-val="{{ false }}">
-    <nav style="flex-shrink:0;z-index:90;display:grid;grid-template-columns:repeat({{ navCount }},1fr);background:var(--hl-header);border-top:1px solid var(--hl-line);padding:8px 4px 12px 4px;">
+    <nav style="flex-shrink:0;z-index:90;display:grid;grid-template-columns:repeat(4,1fr);background:var(--hl-header);border-top:1px solid var(--hl-line);padding:8px 4px 12px 4px;">
       <sc-for list="{{ navTabs }}" as="t" hint-placeholder-count="4">
         <button onClick="{{ t.onClick }}" style="display:flex;flex-direction:column;align-items:center;gap:3px;min-height:52px;padding:6px 2px;border:none;background:transparent;cursor:pointer;font-family:inherit;">
           <span style="position:relative;">
@@ -565,132 +447,12 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:var(--hl-date-filte
     </div>
   </sc-if>
 </div>
-<sc-if value="{{ gearShow }}" hint-placeholder-val="{{ false }}">
-  <button onClick="{{ onSyncOpen }}" title="Sync & account" style="font-family:'Outfit',system-ui,sans-serif;position:fixed;top:14px;right:14px;z-index:150;width:34px;height:34px;border-radius:17px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-label);font-size:0.95rem;cursor:pointer;box-shadow:var(--hl-card-shadow);display:flex;align-items:center;justify-content:center;">⚙</button>
-</sc-if>
-
-<sc-if value="{{ conflictsOpen }}" hint-placeholder-val="{{ false }}">
-  <div style="position:fixed;inset:0;z-index:260;display:flex;align-items:flex-end;justify-content:center;background:rgba(10,15,20,.45);font-family:'Outfit',system-ui,sans-serif;color:var(--hl-text);">
-    <div style="width:100%;max-width:520px;max-height:76vh;overflow:auto;background:var(--hl-bg);border-radius:20px 20px 0 0;padding:20px 20px 28px 20px;display:flex;flex-direction:column;gap:14px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
-        <div>
-          <div style="font-family:'Outfit',system-ui,sans-serif;font-size:1.1rem;font-weight:700;color:var(--hl-text);">Merged records</div>
-          <div style="font-size:0.78rem;color:var(--hl-label);margin-top:2px;">Both copies were kept. Delete whichever you don't need from the visit.</div>
-        </div>
-        <button onClick="{{ onConflictsClose }}" style="flex-shrink:0;width:30px;height:30px;border-radius:15px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-label);cursor:pointer;font-size:0.9rem;">✕</button>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <sc-for list="{{ conflictList }}" as="c" hint-placeholder-count="2">
-          <div style="display:flex;align-items:flex-start;gap:12px;background:var(--hl-card);border:1px solid var(--hl-line);border-radius:14px;padding:14px;box-shadow:var(--hl-card-shadow);">
-            <span style="flex-shrink:0;font-size:0.95rem;">{{ c.icon }}</span>
-            <div style="flex:1;min-width:0;">
-              <div style="font-size:0.85rem;font-weight:600;color:var(--hl-text);line-height:1.4;">{{ c.label }}</div>
-              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">
-                <span style="font-size:0.66rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--hl-h2);background:color-mix(in srgb,var(--hl-h2) 12%,transparent);border-radius:6px;padding:3px 7px;">{{ c.tagServer }}</span>
-                <span style="font-size:0.66rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--hl-h4);background:color-mix(in srgb,var(--hl-h4) 12%,transparent);border-radius:6px;padding:3px 7px;">{{ c.tagDevice }}</span>
-              </div>
-            </div>
-            <button onClick="{{ c.onDismiss }}" style="flex-shrink:0;align-self:center;padding:7px 12px;border-radius:10px;border:1px solid var(--hl-line);background:transparent;color:var(--hl-label);font-size:0.74rem;font-weight:600;cursor:pointer;">Got it</button>
-          </div>
-        </sc-for>
-      </div>
-    </div>
-  </div>
-</sc-if>
-
-<sc-if value="{{ syncOpen }}" hint-placeholder-val="{{ false }}">
-  <div onClick="{{ onSyncClose }}" style="position:fixed;inset:0;z-index:250;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(10,15,20,.45);font-family:'Outfit',system-ui,sans-serif;color:var(--hl-text);">
-    <div onClick="{{ stopBubble }}" style="width:100%;max-width:360px;background:var(--hl-bg);border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:16px;box-shadow:0 24px 60px rgba(10,15,20,.3);">
-      <div>
-        <div style="font-family:'Outfit',system-ui,sans-serif;font-size:1.1rem;font-weight:700;color:var(--hl-text);">Sync &amp; account</div>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--hl-card);border:1px solid var(--hl-line);border-radius:14px;padding:14px;">
-        <div>
-          <div style="font-size:0.85rem;font-weight:600;color:var(--hl-text);">{{ syncStateLabel }}</div>
-          <div style="font-size:0.74rem;color:var(--hl-label);margin-top:2px;">{{ syncSubLabel }}</div>
-        </div>
-        <button onClick="{{ onSyncNow }}" disabled="{{ syncBusy }}" style="flex-shrink:0;padding:9px 15px;border-radius:11px;border:none;background:linear-gradient(135deg,var(--hl-h1),var(--hl-h1d));color:#ffffff;font-family:'Outfit',system-ui,sans-serif;font-size:0.78rem;font-weight:600;cursor:pointer;opacity:{{ syncBtnOpacity }};">{{ syncBtnLabel }}</button>
-      </div>
-      <sc-if value="{{ syncMsg }}" hint-placeholder-val="{{ false }}">
-        <div style="font-size:0.78rem;line-height:1.45;color:{{ syncMsgCol }};background:var(--hl-card);border:1px solid var(--hl-line);border-radius:12px;padding:11px 13px;">{{ syncMsg }}</div>
-      </sc-if>
-      <div style="display:flex;align-items:center;gap:10px;padding:12px 13px;border-radius:12px;background:var(--hl-bg);border:1px solid var(--hl-line);">
-        <div style="width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--hl-h1d);color:#ffffff;font-size:0.85rem;font-weight:700;">{{ acctInitial }}</div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-size:0.7rem;color:var(--hl-label);letter-spacing:0.04em;">SIGNED IN AS</div>
-          <div style="font-size:0.84rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ acctEmail }}</div>
-        </div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <button onClick="{{ onResetDevice }}" style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-text);font-family:'Outfit',system-ui,sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;">Refresh from server</button>
-        <button onClick="{{ onSignOut }}" style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-text);font-family:'Outfit',system-ui,sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;">Sign out</button>
-        <button onClick="{{ onDeleteData }}" style="width:100%;padding:12px;border-radius:12px;border:1px solid color-mix(in srgb,#dc2626 35%,transparent);background:transparent;color:#dc2626;font-family:'Outfit',system-ui,sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;">{{ deleteLabel }}</button>
-      </div>
-      <div style="font-size:0.7rem;color:var(--hl-muted);line-height:1.5;">Sessions last 30 days on this device. Everything is cached locally, so the app keeps working offline and syncs when you're back.</div>
-    </div>
-  </div>
-</sc-if>
-
-<sc-if value="{{ showAuth }}" hint-placeholder-val="{{ false }}">
-  <div style="position:fixed;inset:0;z-index:400;display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:24px;background:linear-gradient(165deg,color-mix(in srgb,var(--hl-h1d) 72%,#0b1f22) 0%,var(--hl-h1d) 52%,var(--hl-h1) 100%);font-family:'Outfit',system-ui,sans-serif;color:var(--hl-text);">
-    <div style="width:100%;max-width:340px;margin:auto 0;display:flex;flex-direction:column;gap:22px;flex-shrink:0;">
-      <div style="display:flex;flex-direction:column;align-items:center;gap:12px;color:#ffffff;">
-        <div style="width:60px;height:60px;border-radius:19px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.38);display:flex;align-items:center;justify-content:center;box-shadow:0 12px 30px rgba(0,0,0,.18);">
-          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2v2"></path><path d="M5 2v2"></path><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"></path><path d="M8 15a6 6 0 0 0 12 0v-3"></path><circle cx="20" cy="10" r="2"></circle></svg>
-        </div>
-        <div style="font-size:1.65rem;font-weight:700;letter-spacing:-.015em;line-height:1;">HealthLog</div>
-      </div>
-      <div style="background:var(--hl-card);border-radius:22px;padding:24px 22px 20px 22px;display:flex;flex-direction:column;gap:14px;box-shadow:0 30px 70px rgba(0,0,0,.28);">
-        <div>
-          <div style="font-size:1.1rem;font-weight:700;color:var(--hl-text);letter-spacing:-.01em;">{{ authTitle }}</div>
-          <div style="font-size:0.82rem;color:var(--hl-label);margin-top:4px;line-height:1.45;">{{ authSub }}</div>
-        </div>
-        <button onClick="{{ onGoogle }}" style="width:100%;min-height:50px;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 16px;border-radius:13px;border:1px solid var(--hl-line);background:#ffffff;color:#1f2328;font-family:inherit;font-size:0.95rem;font-weight:600;cursor:pointer;" style-hover="background:var(--hl-bg);">
-          <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.49h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.63Z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.17l-2.92-2.26c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18Z"/><path fill="#FBBC05" d="M3.97 10.73a5.41 5.41 0 0 1 0-3.46V4.94H.96a9 9 0 0 0 0 8.12l3.01-2.33Z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.9 11.43 0 9 0A9 9 0 0 0 .96 4.94l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58Z"/></svg>
-          <span>Continue with Google</span>
-        </button>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div style="flex:1;height:1px;background:var(--hl-line);"></div>
-          <span style="font-size:0.72rem;color:var(--hl-label);">or</span>
-          <div style="flex:1;height:1px;background:var(--hl-line);"></div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:9px;">
-          <input type="email" value="{{ authEmail }}" onChange="{{ onAuthEmail }}" onKeyDown="{{ onAuthKey }}" placeholder="you@email.com" autoComplete="email" style="width:100%;box-sizing:border-box;padding:13px 14px;border-radius:12px;border:1px solid var(--hl-line);background:var(--hl-bg);color:var(--hl-text);font-family:inherit;font-size:0.92rem;outline:none;" />
-          <sc-if value="{{ authShowPwField }}" hint-placeholder-val="{{ true }}">
-            <div style="position:relative;">
-              <input type="{{ authPwType }}" value="{{ authPw }}" onChange="{{ onAuthPw }}" onKeyDown="{{ onAuthKey }}" placeholder="Password" autoComplete="current-password" style="width:100%;box-sizing:border-box;padding:13px 66px 13px 14px;border-radius:12px;border:1px solid var(--hl-line);background:var(--hl-bg);color:var(--hl-text);font-family:inherit;font-size:0.92rem;outline:none;" />
-              <button onClick="{{ onTogglePw }}" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);min-height:30px;padding:0 10px;border-radius:8px;border:none;background:transparent;color:var(--hl-label);font-family:inherit;font-size:0.74rem;font-weight:600;cursor:pointer;">{{ authPwToggleLabel }}</button>
-            </div>
-          </sc-if>
-        </div>
-        <sc-if value="{{ authMsg }}" hint-placeholder-val="{{ false }}">
-          <div style="font-size:0.8rem;line-height:1.5;color:{{ authMsgCol }};background:var(--hl-bg);border:1px solid var(--hl-line);border-radius:12px;padding:11px 13px;">{{ authMsg }}</div>
-        </sc-if>
-        <button onClick="{{ onAuthSubmit }}" disabled="{{ authBusy }}" style="width:100%;min-height:50px;padding:0 16px;border-radius:13px;border:none;background:var(--hl-h1d);color:#ffffff;font-family:inherit;font-size:0.95rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 10px 24px var(--hl-g1);opacity:{{ authBtnOpacity }};">
-          <sc-if value="{{ authBusy }}" hint-placeholder-val="{{ false }}">
-            <span style="display:inline-block;width:16px;height:16px;border-radius:8px;border:2px solid rgba(255,255,255,.35);border-top-color:#ffffff;animation:hlSpin .8s linear infinite;"></span>
-          </sc-if>
-          <span>{{ authCta }}</span>
-        </button>
-        <sc-if value="{{ authShowForgot }}" hint-placeholder-val="{{ true }}">
-          <button onClick="{{ onForgot }}" style="align-self:center;padding:4px 6px;border:none;background:transparent;color:var(--hl-h1d);font-family:inherit;font-size:0.8rem;font-weight:600;cursor:pointer;">Forgot password?</button>
-        </sc-if>
-        <div style="height:1px;background:var(--hl-line);"></div>
-        <button onClick="{{ onAuthToggle }}" style="padding:6px;border:none;background:transparent;color:var(--hl-label);font-family:inherit;font-size:0.83rem;cursor:pointer;">{{ authAlt }}</button>
-      </div>
-    </div>
-  </div>
-</sc-if>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Clinical Light&quot;,&quot;Warm Cream&quot;,&quot;Lavender Mist&quot;,&quot;Ocean Teal&quot;,&quot;Midnight&quot;],&quot;default&quot;:&quot;Clinical Light&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Appearance&quot;},&quot;currency&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;USD&quot;,&quot;INR&quot;,&quot;EUR&quot;],&quot;default&quot;:&quot;USD&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Settings&quot;},&quot;monthlyBudget&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:250,&quot;min&quot;:50,&quot;max&quot;:5000,&quot;step&quot;:50,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Settings&quot;},&quot;demoMode&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Preview&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Clinical Light&quot;,&quot;Warm Cream&quot;,&quot;Lavender Mist&quot;,&quot;Ocean Teal&quot;,&quot;Midnight&quot;],&quot;default&quot;:&quot;Clinical Light&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Appearance&quot;},&quot;currency&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;USD&quot;,&quot;INR&quot;,&quot;EUR&quot;],&quot;default&quot;:&quot;USD&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Settings&quot;},&quot;monthlyBudget&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:250,&quot;min&quot;:50,&quot;max&quot;:5000,&quot;step&quot;:50,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Settings&quot;}}">
 class Component extends DCLogic {
   state = {
     ready: false, tab: 'home', visits: [], taken: {}, selectedId: null, modalOpen: false, celebrate: false,
-    viewDate: '', collapsed: {}, dismissed: {}, bulkDone: false, calMonth: '',
     fDate: '', fClinic: '', fDoctor: '', fConcern: '', fNotes: '', fFollowUp: '',
-    session: null, showAuth: false, syncBooted: false, syncBusy: false, syncOpen: false, syncMsg: '', syncMsgOk: false,
-    authMode: 'signin', authShowPw: false, authEmail: '', authPw: '', authMsg: '', authMsgOk: false, authBusy: false,
-    conflicts: [], conflictsOpen: false, confirmDelete: false, sTheme: null, sCurrency: null, sBudget: null,
     fConsult: '', fMeds: '', fOther: '', formMeds: [], formError: ''
   };
   componentDidMount() {
@@ -699,25 +461,13 @@ class Component extends DCLogic {
     this.onResize = () => this.setState({ narrow: window.innerWidth < 760 });
     window.addEventListener('resize', this.onResize);
     this.onResize();
-    import('./healthlog-schedule.js').then(s => { this.SCH = s; this.forceUpdate(); });
     import('./healthlog-data.js').then(m => {
       this.M = m;
-      m.applyTheme(this.themeName());
-      if (this.props.demoMode) {
-        // Demo mode only: local sample data, no login.
-        const data = m.loadData();
-        const sorted = [...data.visits].sort((a, b) => a.date < b.date ? 1 : -1);
-        this.setState({
-          ready: true, syncBooted: true, showAuth: false, session: null, tab: 'today',
-          visits: sorted, taken: data.taken || {}, selectedId: (sorted[0] || {}).id || null
-        });
-        setTimeout(() => this.scrollToNow(), 450);
-        return;
-      }
-      // Signed-in app: the server is the source of truth. Do NOT seed from
-      // local sample data — that used to mask the login screen entirely.
-      this.setState({ ready: true });
-      this.bootSync();
+      m.applyTheme(this.props.theme ?? 'Clinical Light');
+      const data = m.loadData();
+      const sorted = [...data.visits].sort((a, b) => a.date < b.date ? 1 : -1);
+      this.setState({ ready: true, visits: sorted, taken: data.taken || {}, selectedId: (sorted[0] || {}).id || null });
+      setTimeout(() => this.scrollToNow(), 450);
     });
   }
   scrollToNow() {
@@ -725,345 +475,21 @@ class Component extends DCLogic {
     if (m && n) m.scrollTop = Math.max(0, n.getBoundingClientRect().top - m.getBoundingClientRect().top + m.scrollTop - 90);
   }
   componentDidUpdate() {
-    if (this.M) this.M.applyTheme(this.themeName());
-    this.maybePushSettings();
-  }
-  themeName() { return this.state.sTheme ?? this.props.theme ?? 'Clinical Light'; }
-  effSettings() {
-    return {
-      theme: this.state.sTheme ?? this.props.theme ?? 'Clinical Light',
-      currency: this.state.sCurrency ?? this.props.currency ?? 'USD',
-      budget: Number(this.state.sBudget ?? this.props.monthlyBudget ?? 250)
-    };
-  }
-  async pullSettings() {
-    if (!this.S) return;
-    const s = await this.S.getSettings();
-    if (s) this.setState({ sTheme: s.theme, sCurrency: s.currency, sBudget: s.budget });
-    else this.S.saveSettings(this.effSettings());
-  }
-  maybePushSettings() {
-    if (!this.S || !this.state.session) return;
-    const sig = [this.props.theme, this.props.currency, this.props.monthlyBudget].join('|');
-    if (this._propSig === undefined) { this._propSig = sig; return; }
-    if (this._propSig === sig) return;
-    this._propSig = sig;
-    this.setState({ sTheme: null, sCurrency: null, sBudget: null });
-    clearTimeout(this._setT);
-    this._setT = setTimeout(() => this.S.saveSettings({
-      theme: this.props.theme ?? 'Clinical Light',
-      currency: this.props.currency ?? 'USD',
-      budget: Number(this.props.monthlyBudget ?? 250)
-    }), 900);
-  }
-  bootSync() {
-    import('./healthlog-sync.js').then(async S => {
-      this.S = S;
-      await S.init();
-      S.onAuthChange(s => {
-        this.setState({ session: s || null, showAuth: !s });
-        if (s) this.doSync(true);
-      });
-      const s = await S.currentSession();
-      const cached = S.cacheLoad();
-      if (cached && Array.isArray(cached.visits) && cached.visits.length) {
-        this.setState({ visits: [...cached.visits].sort((a, b) => a.date < b.date ? 1 : -1), taken: cached.taken || {} });
-      }
-      this.setState({ session: s || null, showAuth: !s, syncBooted: true });
-      if (s) this.doSync(true);
-      else this.setState({ visits: [], taken: {} });
-    }).catch(e => {
-      console.error('[HealthLog] sync boot failed:', e);
-      this.setState({
-        syncBooted: true, showAuth: true,
-        authMsg: 'Sync service failed to load: ' + ((e && e.message) || e) + ' — reload to retry.',
-        authMsgOk: false
-      });
-    });
-  }
-  async doSync(quiet) {
-    if (!this.S || this.state.syncBusy) return;
-    this.setState({ syncBusy: true, syncMsg: quiet ? '' : this.state.syncMsg });
-    const r = await this.S.syncNow({ visits: this.state.visits, taken: this.state.taken });
-    if (r.ok) {
-      this.setState({
-        visits: [...r.visits].sort((a, b) => a.date < b.date ? 1 : -1),
-        taken: r.taken || {}, conflicts: r.conflicts || [],
-        syncBusy: false, syncMsg: quiet ? '' : 'Everything is up to date.', syncMsgOk: true, syncTick: Date.now()
-      });
-      this.pullSettings();
-    } else {
-      this.setState({ syncBusy: false, syncMsg: r.msg, syncMsgOk: false });
-    }
-  }
-  async submitAuth() {
-    if (!this.S || this.state.authBusy) return;
-    const { authEmail, authPw, authMode } = this.state;
-    if (authMode === 'reset') {
-      if (!authEmail) { this.setState({ authMsg: 'Pop in your email and we will send the link.', authMsgOk: false }); return; }
-      this.setState({ authBusy: true, authMsg: '' });
-      const rr = await this.S.resetPassword(authEmail);
-      this.setState({ authBusy: false, authMsg: rr.msg, authMsgOk: rr.ok, authMode: rr.ok ? 'signin' : 'reset' });
-      return;
-    }
-    if (!authEmail || !authPw) { this.setState({ authMsg: 'Pop in your email and password to continue.', authMsgOk: false }); return; }
-    this.setState({ authBusy: true, authMsg: '' });
-    const r = authMode === 'signup' ? await this.S.signUp(authEmail, authPw) : await this.S.signIn(authEmail, authPw);
-    if (r.ok && r.session) {
-      this.setState({ authBusy: false, authPw: '', authMsg: '', showAuth: false, session: r.session });
-      this.doSync(true);
-    } else if (r.ok) {
-      this.setState({ authBusy: false, authPw: '', authMode: 'signin', authMsg: r.msg || 'Check your inbox to confirm, then sign in.', authMsgOk: true });
-    } else {
-      this.setState({ authBusy: false, authMsg: r.msg, authMsgOk: false });
-    }
-  }
-  async doSignOut() {
-    if (this.S) await this.S.signOut();
-    this.setState({ session: null, showAuth: true, syncOpen: false, authPw: '', authMsg: '' });
-  }
-  async doDelete() {
-    if (!this.S) return;
-    if (!this.state.confirmDelete) { this.setState({ confirmDelete: true }); return; }
-    const r = await this.S.deleteMyData();
-    this.setState({ confirmDelete: false, syncOpen: false, visits: [], taken: {}, conflicts: [], session: null, showAuth: true, syncMsg: r.msg, syncMsgOk: r.ok });
-  }
-  authVals() {
-    const st = this.state, S = this.S;
-    const signup = st.authMode === 'signup', reset = st.authMode === 'reset';
-    const cs = (st.conflicts || []);
-    return {
-      showAuth: !!st.showAuth,
-      authTitle: reset ? 'Reset your password' : signup ? 'Create your account' : 'Welcome back',
-      authSub: reset ? "Enter your email and we'll send a link to choose a new password." : signup ? 'Your visits and medicines will follow you to every device.' : 'Sign in to pick up where you left off.',
-      authCta: st.authBusy ? (reset ? 'Sending…' : signup ? 'Creating…' : 'Signing in…') : (reset ? 'Send reset link' : signup ? 'Create account' : 'Sign in'),
-      authAlt: reset ? 'Back to sign in' : signup ? 'Already have an account? Sign in' : "New here? Create an account",
-      authShowPwField: !reset,
-      authShowForgot: !signup && !reset,
-      authPwType: st.authShowPw ? 'text' : 'password',
-      authPwToggleLabel: st.authShowPw ? 'Hide' : 'Show',
-      onTogglePw: () => this.setState({ authShowPw: !st.authShowPw }),
-      onForgot: () => this.setState({ authMode: 'reset', authMsg: '' }),
-      authBusy: !!st.authBusy,
-      authBtnOpacity: st.authBusy ? 0.75 : 1,
-      authEmail: st.authEmail || '', authPw: st.authPw || '',
-      authMsg: st.authMsg || '',
-      authMsgCol: st.authMsgOk ? 'var(--hl-h3)' : '#dc2626',
-      onAuthEmail: e => this.setState({ authEmail: e.target.value }),
-      onAuthPw: e => this.setState({ authPw: e.target.value }),
-      onAuthKey: e => { if (e.key === 'Enter') this.submitAuth(); },
-      onAuthSubmit: () => this.submitAuth(),
-      onGoogle: async () => {
-        if (!this.S) { this.setState({ authMsg: 'Sync service is not loaded yet — reload the page.', authMsgOk: false }); return; }
-        this.setState({ authBusy: true, authMsg: '' });
-        const r = await this.S.signInWithGoogle();
-        if (!r.ok) this.setState({ authBusy: false, authMsg: r.msg, authMsgOk: false });
-      },
-      onAuthToggle: () => this.setState({ authMode: (signup || reset) ? 'signin' : 'signup', authMsg: '' }),
-      gearShow: !!st.session && !st.showAuth,
-      syncOpen: !!st.syncOpen,
-      onSyncOpen: () => this.setState({ syncOpen: true, syncMsg: '', confirmDelete: false }),
-      onSyncClose: () => this.setState({ syncOpen: false, confirmDelete: false }),
-      stopBubble: e => e.stopPropagation(),
-      syncStateLabel: st.syncBusy ? 'Syncing…' : (S ? S.lastSyncLabel() : 'Not synced yet'),
-      syncSubLabel: S && S.isPending() ? 'Some changes are waiting to go up' : 'Visits, medicines, doses and expenses',
-      syncBtnLabel: st.syncBusy ? '…' : 'Sync now',
-      syncBtnOpacity: st.syncBusy ? 0.6 : 1,
-      syncBusy: !!st.syncBusy,
-      onSyncNow: () => this.doSync(false),
-      syncMsg: st.syncMsg || '',
-      syncMsgCol: st.syncMsgOk ? 'var(--hl-h3)' : '#dc2626',
-      acctEmail: (st.session && st.session.user && st.session.user.email) || 'Not signed in',
-      acctInitial: ((st.session && st.session.user && st.session.user.email) || '?').charAt(0).toUpperCase(),
-      onResetDevice: () => {
-        if (this.S && this.S.resetDevice) this.S.resetDevice();
-        this.setState({ visits: [], taken: {}, conflicts: [], syncMsg: 'Cleared this device — pulling from the server…', syncMsgOk: true });
-        this.doSync(false);
-      },
-      onSignOut: () => this.doSignOut(),
-      onDeleteData: () => this.doDelete(),
-      deleteLabel: st.confirmDelete ? 'Tap again to delete everything' : 'Delete my data',
-      hasConflicts: cs.length > 0 && !st.showAuth,
-      conflictLabel: cs.length === 1 ? '1 merged record' : cs.length + ' merged records',
-      conflictsOpen: !!st.conflictsOpen,
-      onConflictsOpen: () => this.setState({ conflictsOpen: true }),
-      onConflictsClose: () => this.setState({ conflictsOpen: false }),
-      conflictList: cs.map(c => ({
-        id: c.id,
-        icon: c.kind === 'dose' ? '⏱' : '💊',
-        label: c.label,
-        tagServer: 'from server',
-        tagDevice: 'from this device',
-        onDismiss: () => {
-          if (this.S) this.S.dismissConflict(c.id);
-          this.setState({ conflicts: (this.state.conflicts || []).filter(x => x.id !== c.id) });
-        }
-      }))
-    };
+    if (this.M) this.M.applyTheme(this.props.theme ?? 'Clinical Light');
   }
   persist(visits, taken) {
-    const payload = { visits: visits || this.state.visits, taken: taken || this.state.taken };
-    if (this.M) this.M.saveData(payload);
-    if (this.S) {
-      this.S.cacheSave(payload);
-      this.S.queuePending();
-      clearTimeout(this._pushT);
-      this._pushT = setTimeout(() => { if (this.state.session) this.S.push(payload); }, 1200);
-    }
+    if (this.M) this.M.saveData({ visits: visits || this.state.visits, taken: taken || this.state.taken });
   }
   emptyMed() { return { name: '', dose: '', days: '7', slots: ['morning'] }; }
   updMed(i, patch) {
     this.setState({ formMeds: this.state.formMeds.map((m, j) => j === i ? { ...m, ...patch } : m) });
   }
-
-  // ---------- Today: clock list, long-press undo, backfill, month grid ----------
-  setDose(key, dateStr, val) {
-    const t = { ...(this.state.taken || {}) };
-    t[dateStr] = { ...(t[dateStr] || {}) };
-    if (val) t[dateStr][key] = true; else delete t[dateStr][key];
-    this.setState({ taken: t });
-    this.persist(null, t);
-  }
-  pressStart(key, dateStr, isTaken) {
-    clearTimeout(this._press);
-    this._pressFired = false;
-    if (!isTaken) return;
-    const ms = (this.SCH && this.SCH.PRESS_MS) || 600;
-    this._press = setTimeout(() => { this._pressFired = true; this.setDose(key, dateStr, false); }, ms);
-  }
-  pressEnd(key, dateStr, isTaken) {
-    clearTimeout(this._press);
-    if (!this._pressFired && !isTaken) this.setDose(key, dateStr, true);
-    this._pressFired = false;
-  }
-  runBackfill(plan) {
-    const t = { ...(this.state.taken || {}) };
-    plan.forEach(p => { t[p.date] = { ...(t[p.date] || {}), [p.key]: true }; });
-    this.setState({ taken: t, bulkDone: true });
-    this.persist(null, t);
-  }
-  todayVals() {
-    const S = this.SCH, st = this.state;
-    if (!S) return { tBlocks: [], tAlerts: [], calCells: [], calWeekdays: [], tHasAlerts: false };
-    const now = new Date();
-    const todayKey = S.dayKey(now);
-    const date = st.viewDate || todayKey;
-    const isPast = date < todayKey;
-    const visits = st.visits || [];
-    const doses = S.dosesForDay(visits, date, st.taken);
-    const blocks = S.timeBlocks(doses, date, st.taken, now);
-    const dayTaken = (st.taken || {})[date] || {};
-    const done = doses.filter(d => dayTaken[d.key]).length;
-
-    const stateCol = {
-      taken: { dot: 'var(--hl-h3)', bd: 'var(--hl-h3d)' },
-      due: { dot: '#dc2626', bd: '#dc2626' },
-      missed: { dot: '#dc2626', bd: '#dc2626' },
-      autoskip: { dot: 'var(--hl-muted)', bd: 'var(--hl-muted)' },
-      upcoming: { dot: 'transparent', bd: 'var(--hl-line)' }
-    };
-
-    const tBlocks = blocks.map(g => {
-      const ck = date + '|' + g.time;
-      const open = st.collapsed[ck] !== undefined ? !st.collapsed[ck] : !g.settled;
-      const due = g.status === 'due';
-      return {
-        ...g,
-        isOpen: open, isShut: !open,
-        onToggle: () => this.setState({ collapsed: { ...st.collapsed, [ck]: open } }),
-        timeCol: due ? '#dc2626' : g.status === 'done' ? 'var(--hl-muted)' : 'var(--hl-text)',
-        lineCol: due ? 'color-mix(in srgb,#dc2626 45%,transparent)' : 'var(--hl-line)',
-        pill: due ? 'DUE NOW' : g.status === 'missed' ? 'MISSED' : g.status === 'done' ? 'DONE' : 'UPCOMING',
-        pillBg: due || g.status === 'missed' ? 'color-mix(in srgb,#dc2626 12%,transparent)' : g.status === 'done' ? 'color-mix(in srgb,#16a34a 12%,transparent)' : 'var(--hl-rail)',
-        pillCol: due || g.status === 'missed' ? '#dc2626' : g.status === 'done' ? 'var(--hl-h3d)' : 'var(--hl-label)',
-        shutLabel: g.done + ' done' + (g.missed ? ', ' + g.missed + ' missed' : '') + (g.missed ? '' : ' \u2713'),
-        shutCol: g.missed ? '#dc2626' : 'var(--hl-h3d)',
-        items: g.items.map(d => {
-          const tk = d.state === 'taken';
-          const c = stateCol[d.state] || stateCol.upcoming;
-          return {
-            ...d,
-            note: [d.dose, d.seq, d.qtyLeft !== null ? d.qtyLeft + ' left in pack' : ''].filter(Boolean).join(' \u00b7 '),
-            boxBg: tk ? 'var(--hl-h3)' : 'transparent',
-            boxBd: c.bd, boxMark: tk ? '\u2713' : d.state === 'autoskip' ? '\u2013' : '',
-            cardBg: d.state === 'due' ? 'color-mix(in srgb,#dc2626 5%,var(--hl-card))' : 'var(--hl-card)',
-            cardBd: d.state === 'due' ? 'color-mix(in srgb,#dc2626 38%,transparent)' : 'var(--hl-line)',
-            anim: d.state === 'due' ? 'hlPulse 1.8s ease infinite' : 'none',
-            nameCol: tk || d.state === 'autoskip' ? 'var(--hl-muted)' : 'var(--hl-text)',
-            deco: tk ? 'line-through' : 'none',
-            hint: tk ? 'Hold to undo' : d.state === 'autoskip' ? 'Auto-skipped \u00b7 tap to correct' : '',
-            onDown: () => this.pressStart(d.key, date, tk),
-            onUp: () => this.pressEnd(d.key, date, tk),
-            onLeave: () => clearTimeout(this._press)
-          };
-        })
-      };
-    });
-
-    const tAlerts = S.alertsFor(visits, date, st.taken, now, st.dismissed).map(a => {
-      const tone = a.kind === 'refill' ? ['#c2410c', '#ea580c'] : a.kind === 'stop' ? ['#b91c1c', '#dc2626']
-        : a.kind === 'finished' ? ['var(--hl-h3d)', '#16a34a'] : ['#1d4ed8', '#2563eb'];
-      return {
-        ...a, col: tone[0],
-        bg: 'color-mix(in srgb,' + tone[1] + ' 9%,transparent)',
-        bd: 'color-mix(in srgb,' + tone[1] + ' 32%,transparent)',
-        onDismiss: () => this.setState({ dismissed: { ...st.dismissed, [a.id + '|' + date]: true } })
-      };
-    });
-
-    const month = st.calMonth || date;
-    const calCells = S.monthCells(visits, month, st.taken, now, 4).map(c => ({
-      ...c,
-      dayLabel: c.blank ? '' : String(c.day),
-      cellBg: c.isToday ? 'color-mix(in srgb,var(--hl-h3) 12%,transparent)' : c.date === date ? 'var(--hl-rail)' : 'transparent',
-      cellBd: c.date === date && !c.isToday ? 'var(--hl-label)' : c.isToday ? 'var(--hl-h3)' : 'transparent',
-      numCol: c.blank ? 'transparent' : c.isFuture ? 'var(--hl-muted)' : 'var(--hl-text)',
-      overflowLabel: c.overflow ? '+' + c.overflow : '',
-      dotVMs: (c.dots || []).map(s => ({
-        bg: (stateCol[s] || stateCol.upcoming).dot,
-        bd: (stateCol[s] || stateCol.upcoming).bd
-      })),
-      onPick: c.blank || c.isFuture ? (() => { }) : (() => this.setState({ viewDate: c.date, tab: 'today' }))
-    }));
-
-    const plan = st.bulkDone ? [] : S.backfillPlan(visits, todayKey, st.taken);
-    // keys are '<visitId>-<medIndex>-<slot>' and visit ids contain dashes,
-    // so drop the last two segments rather than keeping the first two
-    const planCourses = new Set(plan.map(p => p.key.split('-').slice(0, -2).join('-') + '|' + p.key.split('-').slice(-2, -1))).size;
-    const planFrom = plan.length ? plan.map(p => p.date).sort()[0] : '';
-    const monthD = new Date(month + 'T00:00:00');
-
-    return {
-      tBlocks, tAlerts, calCells,
-      tHasAlerts: tAlerts.length > 0,
-      calWeekdays: ['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => ({ label: d, key: 'wd' + i })),
-      calTitle: monthD.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
-      calPrev: () => this.setState({ calMonth: S.dayKey(new Date(monthD.getFullYear(), monthD.getMonth() - 1, 1)) }),
-      calNext: () => this.setState({ calMonth: S.dayKey(new Date(monthD.getFullYear(), monthD.getMonth() + 1, 1)) }),
-      tDateLabel: new Date(date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' }),
-      tDateSub: isPast ? (S.daysBetween(date, todayKey) === 1 ? 'yesterday' : S.daysBetween(date, todayKey) + ' days ago') : 'today',
-      tIsPast: isPast,
-      tBg: isPast ? 'var(--hl-rail)' : 'var(--hl-bg)',
-      tPrevDay: () => this.setState({ viewDate: S.addDays(date, -1), calMonth: S.addDays(date, -1) }),
-      tNextDay: () => this.setState({ viewDate: date >= todayKey ? date : S.addDays(date, 1) }),
-      tNextDim: date >= todayKey ? '0.25' : '1',
-      tBackToday: () => this.setState({ viewDate: '', calMonth: '' }),
-      tCount: doses.length ? done + ' / ' + doses.length : 'nothing due',
-      tPct: doses.length ? Math.round(done / doses.length * 100) : 0,
-      tEmpty: doses.length === 0,
-      tShowBulk: plan.length > 0 && !isPast,
-      tBulkLabel: plan.length > 60 ? 'Mark all as taken' : 'Mark ' + plan.length + ' past doses as taken',
-      tBulkSub: plan.length + ' doses across ' + planCourses + (planCourses === 1 ? ' running course' : ' running courses') + (planFrom ? ', since ' + S.fmtDate(planFrom) : ''),
-      tRunBulk: () => this.runBackfill(plan),
-      tSkipBulk: () => this.setState({ bulkDone: true })
-    };
-  }
   renderVals() {
     const stub = () => { };
-    if (!this.M || !this.state.ready) return { ...this.authVals(), navCount: 5, openModal: stub, stopProp: stub, navDisplay: 'flex', narrowNav: false };
+    if (!this.M || !this.state.ready) return { openModal: stub, stopProp: stub, navDisplay: 'flex', narrowNav: false };
     const M = this.M, st = this.state;
-    const cur = st.sCurrency ?? this.props.currency ?? 'USD';
-    const budget = Number(st.sBudget ?? this.props.monthlyBudget ?? 250);
+    const cur = this.props.currency ?? 'USD';
+    const budget = Number(this.props.monthlyBudget ?? 250);
     const fmt = n => M.fmtMoney(n, cur);
     const today = M.todayISO();
     const year = today.slice(0, 4);
@@ -1090,7 +516,6 @@ class Component extends DCLogic {
     };
     const TABS = [
       { key: 'home', label: 'Home', emoji: '📋', hue: 1 },
-      { key: 'today', label: 'Today', emoji: '⏰', hue: 3 },
       { key: 'visits', label: 'Visits', emoji: '🏥', hue: 2 },
       { key: 'schedule', label: 'Schedule', emoji: '💊', hue: 3 },
       { key: 'expenses', label: 'Expenses', emoji: '💰', hue: 4 }
@@ -1113,11 +538,10 @@ class Component extends DCLogic {
     const doses = M.dosesForDate(visits, today);
     const slotMeta = {};
     M.SLOTS.forEach(s => slotMeta[s.key] = s);
-    const slotOf = k => slotMeta[k] || { key: k, emoji: '💊', label: k || 'Dose', time: '' };
     const doseVM = d => {
       const tk = !!takenToday[d.id];
       return {
-        ...d, slotEmoji: slotOf(d.slot).emoji, slotLabel: slotOf(d.slot).label,
+        ...d, slotEmoji: slotMeta[d.slot].emoji, slotLabel: slotMeta[d.slot].label,
         btnLabel: tk ? '✓ Taken' : 'Take',
         btnBg: tk ? 'linear-gradient(135deg,var(--hl-h3),var(--hl-h3d))' : 'transparent',
         btnCol: tk ? '#ffffff' : 'var(--hl-label)',
@@ -1134,16 +558,6 @@ class Component extends DCLogic {
     const missedDoses = doses.filter(d => !takenToday[d.id] && hourNow > slotHour[d.slot] + 2);
     const remaining = doses.filter(d => !takenToday[d.id]).length;
     navTabs.forEach(t => { t.badge = (t.key === 'schedule' && remaining > 0) ? String(remaining) : false; });
-    const openConflicts = (st.conflicts || []).length;
-    if (openConflicts > 0) {
-      navTabs.push({
-        key: 'conflicts', label: 'Merged', emoji: '⚠', hue: 4,
-        bg: 'transparent', col: '#dc2626', glow: 'none',
-        hoverBg: 'color-mix(in srgb,#dc2626 10%,transparent)',
-        bCol: '#dc2626', dim: 'none', badge: String(openConflicts),
-        onClick: () => this.setState({ conflictsOpen: true })
-      });
-    }
     const timeline = M.SLOTS.map(s => {
       const ds = doses.filter(d => d.slot === s.key);
       const slotDone = ds.length > 0 && ds.every(d => takenToday[d.id]);
@@ -1261,7 +675,7 @@ class Component extends DCLogic {
       onDays: e => this.updMed(i, { days: e.target.value }),
       onRemove: () => this.setState({ formMeds: st.formMeds.filter((x, j) => j !== i) }),
       slotBtns: M.SLOTS.map(s => {
-        const on = (m.slots || []).includes(s.key);
+        const on = m.slots.includes(s.key);
         return {
           label: s.label, emoji: s.emoji,
           bg: on ? 'linear-gradient(135deg,var(--hl-h3),var(--hl-h3d))' : 'transparent',
@@ -1274,14 +688,11 @@ class Component extends DCLogic {
     return {
       showHome: st.tab === 'home', showVisits: st.tab === 'visits',
       showSchedule: st.tab === 'schedule', showExpenses: st.tab === 'expenses',
-      showToday: st.tab === 'today', ...this.todayVals(),
       navTabs, quickActions, timeline,
       navDisplay: st.narrow ? 'none' : 'flex',
       narrowNav: !!st.narrow,
       dueBanner: dueDoses.length > 0,
       dueText: dueDoses.length === 1 ? (dueDoses[0].name + ' ' + dueDoses[0].dose + ' is due now') : (dueDoses.length + ' doses are due now'),
-      navCount: navTabs.length,
-      ...this.authVals(),
       scrollToNow: () => this.scrollToNow(),
       missedBanner: missedDoses.length > 0,
       missedText: missedDoses.length === 1 ? ('You missed ' + missedDoses[0].name + ' — take late or skip below') : ('You missed ' + missedDoses.length + ' doses — take late or skip below'),
@@ -1297,9 +708,9 @@ class Component extends DCLogic {
       allDone: !nextDose,
       doneTitle: doses.length ? 'All doses taken today' : 'No doses scheduled today',
       doneSub: doses.length ? 'Nice work staying on track.' : 'Enjoy your medicine-free day.',
-      nextEmoji: nextDose ? slotOf(nextDose.slot).emoji : '',
-      nextSlotLabel: nextDose ? slotOf(nextDose.slot).label : '',
-      nextTime: nextDose ? '· ' + slotOf(nextDose.slot).time : '',
+      nextEmoji: nextDose ? slotMeta[nextDose.slot].emoji : '',
+      nextSlotLabel: nextDose ? slotMeta[nextDose.slot].label : '',
+      nextTime: nextDose ? '· ' + slotMeta[nextDose.slot].time : '',
       nextName: nextDose ? nextDose.name : '',
       nextDoseAmt: nextDose ? nextDose.dose : '',
       nextClinic: nextDose ? 'Prescribed by ' + nextDose.clinic : '',
