@@ -496,17 +496,52 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:var(--hl-date-filte
             <button onClick="{{ addMed }}" style="padding:7px 14px;border-radius:10px;border:1px solid var(--hl-line);background:transparent;color:var(--hl-h3);cursor:pointer;font-family:inherit;font-size:0.85rem;transition:all .2s ease;" style-hover="background:color-mix(in srgb,var(--hl-h3) 10%,transparent);">＋ Add Medicine</button>
           </div>
           <sc-for list="{{ formMeds }}" as="m" hint-placeholder-count="1">
-            <div style="background:var(--hl-rail);border-radius:12px;padding:14px;margin-top:10px;display:flex;flex-direction:column;gap:10px;">
-              <div style="display:grid;grid-template-columns:1.3fr 0.8fr 90px 38px;gap:10px;">
+            <div style="background:var(--hl-rail);border-radius:12px;padding:14px;margin-top:10px;display:flex;flex-direction:column;gap:12px;">
+              <div style="display:grid;grid-template-columns:1.4fr 1fr 38px;gap:10px;">
                 <input type="text" value="{{ m.name }}" onChange="{{ m.onName }}" placeholder="Medicine name" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-text);font-size:0.9rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h3);">
-                <input type="text" value="{{ m.dose }}" onChange="{{ m.onDose }}" placeholder="500 mg" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-text);font-size:0.9rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h3);">
-                <input type="number" value="{{ m.days }}" onChange="{{ m.onDays }}" placeholder="Days" min="1" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-text);font-size:0.9rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h3);">
+                <input type="text" value="{{ m.dose }}" onChange="{{ m.onDose }}" placeholder="Dose · 500 mg" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-text);font-size:0.9rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h3);">
                 <button onClick="{{ m.onRemove }}" style="width:38px;border-radius:10px;border:1px solid var(--hl-line);background:transparent;color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:0.9rem;transition:all .2s ease;" style-hover="color:#ef4444;border-color:rgba(239,68,68,.4);">🗑</button>
               </div>
-              <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                <sc-for list="{{ m.slotBtns }}" as="sb" hint-placeholder-count="4">
-                  <button onClick="{{ sb.onToggle }}" style="padding:8px 14px;border-radius:35px;border:1px solid {{ sb.bd }};background:{{ sb.bg }};color:{{ sb.col }};cursor:pointer;font-family:inherit;font-size:0.8rem;transition:all .2s ease;">{{ sb.emoji }} {{ sb.label }}</button>
+              <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
+                <span style="font-size:0.72rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--hl-label);font-weight:700;margin-right:2px;">How often</span>
+                <sc-for list="{{ m.freqBtns }}" as="f" hint-placeholder-count="4">
+                  <button onClick="{{ f.onPick }}" style="padding:8px 14px;border-radius:35px;border:1px solid {{ f.bd }};background:{{ f.bg }};color:{{ f.col }};cursor:pointer;font-family:inherit;font-size:0.8rem;font-weight:600;transition:all .2s ease;">{{ f.label }}</button>
                 </sc-for>
+                <sc-if value="{{ m.showEveryN }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="font-size:0.82rem;color:var(--hl-label);">every</span>
+                    <input type="number" min="2" max="30" value="{{ m.everyN }}" onChange="{{ m.onEveryN }}" style="width:74px;padding:9px 11px;border-radius:10px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-text);font-size:0.9rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h3);">
+                    <span style="font-size:0.82rem;color:var(--hl-label);">days</span>
+                  </div>
+                </sc-if>
+              </div>
+              <sc-if value="{{ m.showWeekdays }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                  <sc-for list="{{ m.wdBtns }}" as="w" hint-placeholder-count="7">
+                    <button onClick="{{ w.onToggle }}" title="{{ w.full }}" style="width:38px;height:38px;border-radius:50%;border:1px solid {{ w.bd }};background:{{ w.bg }};color:{{ w.col }};cursor:pointer;font-family:inherit;font-size:0.78rem;font-weight:700;transition:all .2s ease;">{{ w.label }}</button>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
+                <span style="font-size:0.72rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--hl-label);font-weight:700;margin-right:2px;">Dose times</span>
+                <sc-for list="{{ m.timeRows }}" as="t" hint-placeholder-count="1">
+                  <div style="display:flex;align-items:center;gap:4px;">
+                    <input type="time" value="{{ t.value }}" onChange="{{ t.onChange }}" style="width:124px;padding:9px 11px;border-radius:10px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-text);font-size:0.9rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h3);">
+                    <button onClick="{{ t.onRemove }}" style="width:30px;height:30px;border-radius:50%;border:none;background:transparent;color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:0.8rem;opacity:{{ t.dim }};" style-hover="color:#ef4444;">✕</button>
+                  </div>
+                </sc-for>
+                <button onClick="{{ m.onAddTime }}" style="padding:8px 14px;border-radius:35px;border:1px dashed var(--hl-line);background:transparent;color:var(--hl-h3);cursor:pointer;font-family:inherit;font-size:0.8rem;font-weight:600;">＋ Add a time</button>
+              </div>
+              <div style="display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px;">
+                <div style="display:flex;flex-direction:column;gap:4px;">
+                  <label style="font-size:0.75rem;color:var(--hl-label);">Days</label>
+                  <input type="number" value="{{ m.days }}" onChange="{{ m.onDays }}" placeholder="7" min="1" style="width:104px;padding:9px 11px;border-radius:10px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-text);font-size:0.9rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h3);">
+                </div>
+                <div style="display:flex;flex-direction:column;gap:4px;">
+                  <label style="font-size:0.75rem;color:var(--hl-label);">Pack count</label>
+                  <input type="number" value="{{ m.qty }}" onChange="{{ m.onQty }}" placeholder="optional" min="1" style="width:124px;padding:9px 11px;border-radius:10px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-text);font-size:0.9rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h3);">
+                </div>
+                <div style="font-size:0.78rem;color:var(--hl-muted);padding-bottom:10px;">{{ m.summary }}</div>
               </div>
             </div>
           </sc-for>
@@ -911,7 +946,74 @@ class Component extends DCLogic {
       this._pushT = setTimeout(() => { if (this.state.session) this.S.push(payload); }, 1200);
     }
   }
-  emptyMed() { return { name: '', dose: '', days: '7', slots: ['morning'] }; }
+  emptyMed() { return { name: '', dose: '', days: '7', qty: '', freq: 'daily', everyN: '3', weekdays: [new Date().getDay()], times: ['09:00'] }; }
+  nextTime(times) {
+    const last = times[times.length - 1] || '09:00';
+    const h = Math.min(23, (+String(last).split(':')[0] || 9) + 6);
+    return String(h).padStart(2, '0') + ':00';
+  }
+  medFormVM(m, i) {
+    const st = this.state;
+    const WD = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    const WDF = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const freq = m.freq || 'daily';
+    const times = (m.times && m.times.length) ? m.times : ['09:00'];
+    const wd = m.weekdays || [];
+    const tone = yes => ({
+      bg: yes ? 'linear-gradient(135deg,var(--hl-h3),var(--hl-h3d))' : 'transparent',
+      col: yes ? '#ffffff' : 'var(--hl-label)',
+      bd: yes ? 'transparent' : 'var(--hl-line)'
+    });
+    const perLbl = times.length === 1 ? 'once a day' : times.length + '× a day';
+    const freqLbl = freq === 'alt' ? 'Every other day'
+      : freq === 'weekly' ? (wd.length ? wd.slice().sort().map(d => WDF[d].slice(0, 3)).join(', ') + ' only' : 'Pick at least one weekday')
+        : freq === 'everyN' ? 'Every ' + Math.max(2, +m.everyN || 3) + ' days' : 'Daily';
+    const endLbl = +m.qty > 0 ? ('pack of ' + (+m.qty) + ' — runs till empty') : (Math.max(1, +m.days || 1) + ' days');
+    return {
+      name: m.name, dose: m.dose, days: m.days, qty: m.qty, everyN: m.everyN,
+      onName: e => this.updMed(i, { name: e.target.value }),
+      onDose: e => this.updMed(i, { dose: e.target.value }),
+      onDays: e => this.updMed(i, { days: e.target.value }),
+      onQty: e => this.updMed(i, { qty: e.target.value }),
+      onEveryN: e => this.updMed(i, { everyN: e.target.value }),
+      onRemove: () => this.setState({ formMeds: st.formMeds.filter((x, j) => j !== i) }),
+      freqBtns: [['daily', 'Daily'], ['alt', 'Alternate days'], ['weekly', 'Weekly'], ['everyN', 'Every N days']]
+        .map(p => ({ label: p[1], ...tone(freq === p[0]), onPick: () => this.updMed(i, { freq: p[0] }) })),
+      showEveryN: freq === 'everyN',
+      showWeekdays: freq === 'weekly',
+      wdBtns: WD.map((label, d) => ({
+        label, full: WDF[d], ...tone(wd.indexOf(d) >= 0),
+        onToggle: () => this.updMed(i, { weekdays: wd.indexOf(d) >= 0 ? wd.filter(x => x !== d) : [...wd, d] })
+      })),
+      timeRows: times.map((t, ti) => ({
+        value: t,
+        dim: times.length > 1 ? 1 : 0.35,
+        onChange: e => this.updMed(i, { times: times.map((x, j) => j === ti ? e.target.value : x) }),
+        onRemove: () => { if (times.length > 1) this.updMed(i, { times: times.filter((x, j) => j !== ti) }); }
+      })),
+      onAddTime: () => this.updMed(i, { times: [...times, this.nextTime(times)] }),
+      summary: freqLbl + ' · ' + perLbl + ' · ' + endLbl
+    };
+  }
+  medSchedLabel(med) {
+    const S = this.SCH;
+    if (S) return S.ruleLabel(med) + ' · ' + S.medTimes(med).map(t => S.fmtTime(t)).join(', ');
+    return (med.times || med.slots || []).join(' · ');
+  }
+  medPayload(m, dateStr) {
+    const times = (m.times || []).filter(Boolean).slice().sort();
+    const freq = m.freq || 'daily';
+    const out = {
+      name: m.name.trim(), dose: (m.dose || '').trim(),
+      times: times.length ? times : ['09:00'],
+      rule: freq === 'weekly' ? 'weekly' : (freq === 'alt' || freq === 'everyN') ? 'everyN' : 'daily',
+      days: Math.max(1, +m.days || 1)
+    };
+    if (out.rule === 'everyN') out.everyN = freq === 'alt' ? 2 : Math.max(2, +m.everyN || 2);
+    if (out.rule === 'weekly') out.weekdays = (m.weekdays || []).length ? m.weekdays.slice().sort() : [new Date(dateStr + 'T00:00:00').getDay()];
+    if (+m.qty > 0) out.qty = +m.qty;
+    return out;
+  }
   updMed(i, patch) {
     this.setState({ formMeds: this.state.formMeds.map((m, j) => j === i ? { ...m, ...patch } : m) });
   }
@@ -1215,8 +1317,8 @@ class Component extends DCLogic {
         const left = Math.round((new Date(r.end) - new Date(today)) / 86400000);
         return {
           name: med.name, dose: med.dose,
-          slotsLabel: (med.slots || []).map(s => slotMeta[s].label).join(' · '),
-          daysLabel: med.days + ' days',
+          slotsLabel: this.medSchedLabel(med),
+          daysLabel: +med.qty > 0 ? ('pack of ' + (+med.qty)) : (med.days + ' days'),
           statusLabel: active ? ('● Active · ' + (left === 0 ? 'last day' : left + 'd left')) : 'Completed',
           pillBg: active ? 'color-mix(in srgb,var(--hl-h3) 14%,transparent)' : 'var(--hl-hover)',
           pillCol: active ? 'var(--hl-h3)' : 'var(--hl-muted)'
@@ -1254,23 +1356,7 @@ class Component extends DCLogic {
     const maxMonth = Math.max(...months.map(m => m.total), 1);
     const clinicsArr = M.clinicTotals(visits);
     const maxClinic = Math.max(...clinicsArr.map(c => c.total), 1);
-    const formMedsVM = st.formMeds.map((m, i) => ({
-      name: m.name, dose: m.dose, days: m.days,
-      onName: e => this.updMed(i, { name: e.target.value }),
-      onDose: e => this.updMed(i, { dose: e.target.value }),
-      onDays: e => this.updMed(i, { days: e.target.value }),
-      onRemove: () => this.setState({ formMeds: st.formMeds.filter((x, j) => j !== i) }),
-      slotBtns: M.SLOTS.map(s => {
-        const on = (m.slots || []).includes(s.key);
-        return {
-          label: s.label, emoji: s.emoji,
-          bg: on ? 'linear-gradient(135deg,var(--hl-h3),var(--hl-h3d))' : 'transparent',
-          col: on ? '#ffffff' : 'var(--hl-label)',
-          bd: on ? 'transparent' : 'var(--hl-line)',
-          onToggle: () => this.updMed(i, { slots: on ? m.slots.filter(k => k !== s.key) : [...m.slots, s.key] })
-        };
-      })
-    }));
+    const formMedsVM = st.formMeds.map((m, i) => this.medFormVM(m, i));
     return {
       showHome: st.tab === 'home', showVisits: st.tab === 'visits',
       showSchedule: st.tab === 'schedule', showExpenses: st.tab === 'expenses',
@@ -1363,11 +1449,7 @@ class Component extends DCLogic {
           id: 'v' + Date.now(), date: st.fDate, clinic: st.fClinic.trim(),
           doctor: st.fDoctor.trim(), concern: st.fConcern.trim(), notes: st.fNotes.trim(),
           followUp: st.fFollowUp || '',
-          meds: st.formMeds.filter(m => m.name.trim()).map(m => ({
-            name: m.name.trim(), dose: m.dose.trim(),
-            slots: m.slots.length ? m.slots : ['morning'],
-            days: Math.max(1, +m.days || 1)
-          })),
+          meds: st.formMeds.filter(m => m.name.trim()).map(m => this.medPayload(m, st.fDate)),
           costs: { consult: +st.fConsult || 0, meds: +st.fMeds || 0, other: +st.fOther || 0 }
         };
         const arr = [nv, ...st.visits].sort((a, b) => a.date < b.date ? 1 : -1);

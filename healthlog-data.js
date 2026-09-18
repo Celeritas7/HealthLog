@@ -37,11 +37,18 @@ export function activeCourses(visits, dateStr) {
   return out;
 }
 
+// Slot-keyed doses for the legacy Home timeline / Schedule tab.
+// Medicines with explicit clock `times` are owned by healthlog-schedule.js
+// (Today tab + calendar) and are skipped here — their dose keys are HHMM, so
+// listing them under a slot would tick a second, parallel set of keys.
 export function dosesForDate(visits, dateStr) {
   const out = [];
-  activeCourses(visits, dateStr).forEach(c => (c.med.slots || []).forEach(slot => {
-    out.push({ id: c.visitId + '-' + c.medIndex + '-' + slot, slot, name: c.med.name, dose: c.med.dose, clinic: c.clinic });
-  }));
+  activeCourses(visits, dateStr).forEach(c => {
+    if (c.med.times && c.med.times.length) return;
+    (c.med.slots || []).forEach(slot => {
+      out.push({ id: c.visitId + '-' + c.medIndex + '-' + slot, slot, name: c.med.name, dose: c.med.dose, clinic: c.clinic });
+    });
+  });
   const order = { morning: 0, noon: 1, evening: 2, night: 3 };
   return out.sort((a, b) => order[a.slot] - order[b.slot]);
 }
