@@ -261,20 +261,21 @@ export function alertsFor(visits, dateStr, taken, now, dismissed) {
   return out.filter(a => !dz[a.id + '|' + dateStr]);
 }
 
-// One-time catch-up offer: every due dose from course start to yesterday,
-// running courses only (finished ones stay blank).
+// Catch-up offer: unticked doses inside the auto-skip window only (older ones
+// already auto-skipped), running courses only.
 export function backfillPlan(visits, dateStr, taken) {
   const plan = [];
+  const from = addDays(dateStr, -Math.ceil(AUTOSKIP_HOURS / 24));
   (visits || []).forEach(v => {
     (v.meds || []).forEach((med, mi) => {
       const seen = takenCount(taken, v.id, mi);
       if (courseOver(med, v.date, dateStr, seen)) return;
-      let d = v.date;
+      let d = v.date > from ? v.date : from;
       while (d < dateStr) {
         if (dueOn(med, v.date, d)) {
           medSchedule(med).forEach(s => {
             const key = v.id + '-' + mi + '-' + s.id;
-            if (!((taken || {})[d] || {})[key]) plan.push({ date: d, key: key });
+            if (!((taken || {})[d] || {})[key]) plan.push({ date: d, key: key, course: v.id + '-' + mi });
           });
         }
         d = addDays(d, 1);

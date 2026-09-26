@@ -21,11 +21,13 @@
   --hl-h4:#ea580c; --hl-h4d:#c2410c; --hl-g4:rgba(234,88,12,.30);
   --hl-date-filter:none;
 }
-html,body{margin:0;padding:0;background:var(--hl-bg);}
+html,body{margin:0;padding:0;background:var(--hl-bg);height:100%;}
+x-dc{display:block;height:100%;}
 *{box-sizing:border-box;}
 a{color:var(--hl-h2);text-decoration:none;}
 a:hover{color:var(--hl-h2d);}
 input::placeholder,textarea::placeholder{color:var(--hl-muted);}
+input:invalid,textarea:invalid,input:user-invalid,textarea:user-invalid{outline:none;box-shadow:none;border-color:var(--hl-line);}
 input[type="date"]::-webkit-calendar-picker-indicator{filter:var(--hl-date-filter);}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
 @keyframes hlPulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.35);}50%{box-shadow:0 0 0 10px rgba(220,38,38,0);}}
@@ -33,7 +35,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:var(--hl-date-filte
 @keyframes hlConfetti{0%{transform:translateY(-5vh) rotate(0);opacity:1;}100%{transform:translateY(105vh) rotate(720deg);opacity:.5;}}
 </style>
 </helmet>
-<div style="height:100vh;display:flex;flex-direction:column;overflow:hidden;position:relative;background:var(--hl-bg);font-family:'Outfit',system-ui,sans-serif;color:var(--hl-text);">
+<div style="height:100%;display:flex;flex-direction:column;overflow:hidden;position:relative;background:var(--hl-bg);font-family:'Outfit',system-ui,sans-serif;color:var(--hl-text);">
   <header data-screen-label="App bar" style="flex-shrink:0;z-index:50;display:flex;align-items:center;flex-wrap:wrap;gap:20px;row-gap:10px;padding:14px 32px;background:var(--hl-header);border-bottom:1px solid var(--hl-line);">
     <div style="display:flex;align-items:center;gap:10px;">
       <span style="font-size:1.4rem;">🩺</span>
@@ -48,7 +50,13 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:var(--hl-date-filte
     </nav>
     <button onClick="{{ openModal }}" style="flex-shrink:0;white-space:nowrap;padding:11px 20px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--hl-h3),var(--hl-h3d));color:#ffffff;font-weight:600;font-family:inherit;font-size:0.95rem;cursor:pointer;box-shadow:0 8px 24px var(--hl-g3);transition:all .2s ease;margin-left:auto;" style-hover="transform:translateY(-2px);">＋ Add Visit</button>
   </header>
-  <main ref="{{ mainRef }}" style="flex:1;overflow-y:auto;width:100%;padding:32px;">
+  <main ref="{{ mainRef }}" style="flex:1;min-height:0;overflow-y:auto;width:100%;padding:32px;">
+  <sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:120px 20px;color:var(--hl-label);">
+      <span style="display:inline-block;width:30px;height:30px;border-radius:50%;border:3px solid var(--hl-line);border-top-color:var(--hl-h3);animation:hlSpin .8s linear infinite;"></span>
+      <div style="font-size:0.95rem;font-weight:500;">Loading your health log…</div>
+    </div>
+  </sc-if>
   <div style="max-width:1180px;margin:0 auto;">
 
     <sc-if value="{{ showHome }}" hint-placeholder-val="{{ true }}">
@@ -366,10 +374,18 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:var(--hl-date-filte
                 <span style="font-size:0.8rem;color:var(--hl-muted);margin-left:auto;">{{ g.time }}</span>
               </div>
               <sc-for list="{{ g.doses }}" as="d" hint-placeholder-count="1">
-                <div style="margin-top:12px;padding:14px;background:var(--hl-rail);border-radius:12px;">
+                <div style="margin-top:12px;padding:14px;background:var(--hl-rail);border:1px solid {{ d.rowBd }};border-radius:12px;">
                   <div style="font-weight:600;font-size:0.95rem;">{{ d.name }}</div>
                   <div style="font-size:0.8rem;color:var(--hl-label);">{{ d.dose }} · {{ d.clinic }}</div>
-                  <button onClick="{{ d.onToggle }}" style="width:100%;margin-top:10px;min-height:38px;padding:8px 12px;border-radius:10px;border:1px solid {{ d.btnBd }};background:{{ d.btnBg }};color:{{ d.btnCol }};cursor:pointer;font-family:inherit;font-size:0.85rem;font-weight:500;transition:all .2s ease;">{{ d.btnLabel }}</button>
+                  <sc-if value="{{ d.missed }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-size:0.75rem;color:#dc2626;margin-top:4px;">Missed — take late or skip</div>
+                  </sc-if>
+                  <div style="display:flex;gap:8px;margin-top:10px;">
+                    <button onClick="{{ d.onToggle }}" style="flex:1;min-height:38px;padding:8px 12px;border-radius:10px;border:1px solid {{ d.btnBd }};background:{{ d.btnBg }};color:{{ d.btnCol }};cursor:pointer;font-family:inherit;font-size:0.85rem;font-weight:500;transition:all .2s ease;">{{ d.btnLabel }}</button>
+                    <sc-if value="{{ d.missed }}" hint-placeholder-val="{{ false }}">
+                      <button onClick="{{ d.onSkip }}" style="min-height:38px;padding:8px 12px;border-radius:10px;border:1px solid var(--hl-line);background:transparent;color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:0.85rem;">Skip</button>
+                    </sc-if>
+                  </div>
                 </div>
               </sc-for>
               <sc-if value="{{ g.empty }}" hint-placeholder-val="{{ false }}">
@@ -462,16 +478,16 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:var(--hl-date-filte
       <div onClick="{{ stopProp }}" data-screen-label="New Visit form" style="width:680px;max-width:100%;max-height:88vh;overflow:auto;background:var(--hl-card);border:1px solid var(--hl-line);border-radius:20px;padding:28px;display:flex;flex-direction:column;gap:20px;animation:fadeIn .25s ease;box-shadow:0 24px 80px rgba(0,0,0,.25);">
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <div style="font-size:1.5rem;font-weight:700;">New Visit</div>
-          <button onClick="{{ closeModal }}" style="width:38px;height:38px;border-radius:10px;border:1px solid var(--hl-line);background:transparent;color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:1rem;transition:all .2s ease;" style-hover="background:var(--hl-hover);">✗</button>
+          <button onClick="{{ closeModal }}" style="width:38px;height:38px;border-radius:10px;border:1px solid var(--hl-line);background:transparent;color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:1rem;transition:all .2s ease;" style-hover="background:var(--hl-hover);">✕</button>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
           <div style="display:flex;flex-direction:column;gap:6px;">
             <label style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">Date</label>
-            <input type="date" value="{{ fDate }}" onChange="{{ onDate }}" style="width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--hl-line);background:var(--hl-rail);color:var(--hl-text);font-size:0.95rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h2);">
+            <input type="date" value="{{ fDate }}" onChange="{{ onDate }}" ref="{{ refDate }}" style="width:100%;padding:11px 14px;border-radius:10px;border:1px solid {{ bdDate }};box-shadow:{{ ringDate }};background:var(--hl-rail);color:var(--hl-text);font-size:0.95rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h2);">
           </div>
           <div style="display:flex;flex-direction:column;gap:6px;">
             <label style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">Clinic</label>
-            <input type="text" value="{{ fClinic }}" onChange="{{ onClinic }}" placeholder="CityCare Family Clinic" style="width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--hl-line);background:var(--hl-rail);color:var(--hl-text);font-size:0.95rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h2);">
+            <input type="text" value="{{ fClinic }}" onChange="{{ onClinic }}" ref="{{ refClinic }}" placeholder="CityCare Family Clinic" style="width:100%;padding:11px 14px;border-radius:10px;border:1px solid {{ bdClinic }};box-shadow:{{ ringClinic }};background:var(--hl-rail);color:var(--hl-text);font-size:0.95rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h2);">
           </div>
           <div style="display:flex;flex-direction:column;gap:6px;">
             <label style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">Doctor</label>
@@ -484,7 +500,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:var(--hl-date-filte
         </div>
         <div style="display:flex;flex-direction:column;gap:6px;">
           <label style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">Health Concern</label>
-          <input type="text" value="{{ fConcern }}" onChange="{{ onConcern }}" placeholder="e.g. Sore throat & fever" style="width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--hl-line);background:var(--hl-rail);color:var(--hl-text);font-size:0.95rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h2);">
+          <input type="text" value="{{ fConcern }}" onChange="{{ onConcern }}" ref="{{ refConcern }}" placeholder="e.g. Sore throat & fever" style="width:100%;padding:11px 14px;border-radius:10px;border:1px solid {{ bdConcern }};box-shadow:{{ ringConcern }};background:var(--hl-rail);color:var(--hl-text);font-size:0.95rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h2);">
         </div>
         <div style="display:flex;flex-direction:column;gap:6px;">
           <label style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">Notes</label>
@@ -726,10 +742,11 @@ class Component extends DCLogic {
     session: null, showAuth: false, syncBooted: false, syncBusy: false, syncOpen: false, syncMsg: '', syncMsgOk: false,
     authMode: 'signin', authShowPw: false, authEmail: '', authPw: '', authMsg: '', authMsgOk: false, authBusy: false,
     conflicts: [], conflictsOpen: false, confirmDelete: false, sTheme: null, sCurrency: null, sBudget: null,
-    fConsult: '', fMeds: '', fOther: '', formMeds: [], formError: ''
+    fConsult: '', fMeds: '', fOther: '', formMeds: [], formError: '', formMissing: []
   };
   componentDidMount() {
     this.mainRef = React.createRef();
+    this.refDate = React.createRef(); this.refClinic = React.createRef(); this.refConcern = React.createRef();
     this.nowRef = React.createRef();
     this.onResize = () => this.setState({ narrow: window.innerWidth < 760 });
     window.addEventListener('resize', this.onResize);
@@ -1067,7 +1084,7 @@ class Component extends DCLogic {
 
     const tBlocks = blocks.map(g => {
       const ck = date + '|' + g.time;
-      const open = st.collapsed[ck] !== undefined ? !st.collapsed[ck] : !g.settled;
+      const open = st.collapsed[ck] !== undefined ? !st.collapsed[ck] : !(g.settled && !g.items.some(i => i.state === 'missed'));
       const due = g.status === 'due';
       return {
         ...g,
@@ -1078,7 +1095,7 @@ class Component extends DCLogic {
         pill: due ? 'DUE NOW' : g.status === 'missed' ? 'MISSED' : g.status === 'done' ? 'DONE' : 'UPCOMING',
         pillBg: due || g.status === 'missed' ? 'color-mix(in srgb,#dc2626 12%,transparent)' : g.status === 'done' ? 'color-mix(in srgb,#16a34a 12%,transparent)' : 'var(--hl-rail)',
         pillCol: due || g.status === 'missed' ? '#dc2626' : g.status === 'done' ? 'var(--hl-h3d)' : 'var(--hl-label)',
-        shutLabel: g.done + ' done' + (g.missed ? ', ' + g.missed + ' missed' : '') + (g.missed ? '' : ' \u2713'),
+        shutLabel: g.done + ' done' + (g.missed ? ', ' + g.missed + ' missed \u00b7 click to show' : ' \u2713'),
         shutCol: g.missed ? '#dc2626' : 'var(--hl-h3d)',
         items: g.items.map(d => {
           const tk = d.state === 'taken';
@@ -1089,11 +1106,11 @@ class Component extends DCLogic {
             boxBg: tk ? 'var(--hl-h3)' : 'transparent',
             boxBd: c.bd, boxMark: tk ? '\u2713' : d.state === 'autoskip' ? '\u2013' : '',
             cardBg: d.state === 'due' ? 'color-mix(in srgb,#dc2626 5%,var(--hl-card))' : 'var(--hl-card)',
-            cardBd: d.state === 'due' ? 'color-mix(in srgb,#dc2626 38%,transparent)' : 'var(--hl-line)',
+            cardBd: d.state === 'due' || d.state === 'missed' ? 'color-mix(in srgb,#dc2626 38%,transparent)' : 'var(--hl-line)',
             anim: d.state === 'due' ? 'hlPulse 1.8s ease infinite' : 'none',
             nameCol: tk || d.state === 'autoskip' ? 'var(--hl-muted)' : 'var(--hl-text)',
             deco: tk ? 'line-through' : 'none',
-            hint: tk ? 'Hold to undo' : d.state === 'autoskip' ? 'Auto-skipped \u00b7 tap to correct' : '',
+            hint: tk ? 'Hold to undo' : d.state === 'autoskip' ? 'Auto-skipped \u00b7 click to correct' : d.state === 'missed' ? 'Missed \u00b7 click to take' : '',
             onDown: () => this.pressStart(d.key, date, tk),
             onUp: () => this.pressEnd(d.key, date, tk),
             onLeave: () => clearTimeout(this._press)
@@ -1129,9 +1146,7 @@ class Component extends DCLogic {
     }));
 
     const plan = st.bulkDone ? [] : S.backfillPlan(visits, todayKey, st.taken);
-    // keys are '<visitId>-<medIndex>-<slot>' and visit ids contain dashes,
-    // so drop the last two segments rather than keeping the first two
-    const planCourses = new Set(plan.map(p => p.key.split('-').slice(0, -2).join('-') + '|' + p.key.split('-').slice(-2, -1))).size;
+    const planCourses = new Set(plan.map(p => p.course)).size;
     const planFrom = plan.length ? plan.map(p => p.date).sort()[0] : '';
     const monthD = new Date(month + 'T00:00:00');
 
@@ -1154,16 +1169,17 @@ class Component extends DCLogic {
       tPct: doses.length ? Math.round(done / doses.length * 100) : 0,
       tEmpty: doses.length === 0,
       tShowBulk: plan.length > 0 && !isPast,
-      tBulkLabel: plan.length > 60 ? 'Mark all as taken' : 'Mark ' + plan.length + ' past doses as taken',
-      tBulkSub: plan.length + ' doses across ' + planCourses + (planCourses === 1 ? ' running course' : ' running courses') + (planFrom ? ', since ' + S.fmtDate(planFrom) : ''),
+      tBulkLabel: 'Mark ' + plan.length + (plan.length === 1 ? ' dose' : ' doses') + ' as taken',
+      tBulkSub: plan.length + (plan.length === 1 ? ' unticked dose' : ' unticked doses') + ' from the last 48 hours across ' + planCourses + (planCourses === 1 ? ' course' : ' courses') + (planFrom ? ', since ' + S.fmtDate(planFrom) : '') + '. Older doses were auto-skipped.',
       tRunBulk: () => this.runBackfill(plan),
       tSkipBulk: () => this.setState({ bulkDone: true })
     };
   }
   renderVals() {
     const stub = () => { };
-    if (!this.M || !this.state.ready) return { ...this.authVals(), navCount: 5, openModal: stub, stopProp: stub, navDisplay: 'flex', narrowNav: false };
+    if (!this.M || !this.state.ready) return { ...this.authVals(), navCount: 5, openModal: stub, stopProp: stub, navDisplay: 'flex', narrowNav: false, loading: true, todayShort: '' };
     const M = this.M, st = this.state;
+    const booted = !!st.syncBooted && !!this.SCH;
     const cur = st.sCurrency ?? this.props.currency ?? 'USD';
     const budget = Number(st.sBudget ?? this.props.monthlyBudget ?? 250);
     const fmt = n => M.fmtMoney(n, cur);
@@ -1217,13 +1233,17 @@ class Component extends DCLogic {
     M.SLOTS.forEach(s => slotMeta[s.key] = s);
     const slotOf = k => slotMeta[k] || { key: k, emoji: '💊', label: k || 'Dose', time: '' };
     const doseVM = d => {
-      const tk = !!takenToday[d.id];
+      const tv = takenToday[d.id], tk = !!tv, skipped = tv === 'skip';
+      const missed = !tk && missedDoses.indexOf(d) >= 0;
       return {
         ...d, slotEmoji: slotOf(d.slot).emoji, slotLabel: slotOf(d.slot).label,
-        btnLabel: tk ? '✓ Taken' : 'Take',
-        btnBg: tk ? 'linear-gradient(135deg,var(--hl-h3),var(--hl-h3d))' : 'transparent',
-        btnCol: tk ? '#ffffff' : 'var(--hl-label)',
-        btnBd: tk ? 'transparent' : 'var(--hl-line)',
+        missed,
+        btnLabel: skipped ? '– Skipped' : tk ? '✓ Taken' : 'Take',
+        btnBg: skipped ? 'var(--hl-muted)' : tk ? 'linear-gradient(135deg,var(--hl-h3),var(--hl-h3d))' : 'var(--hl-card)',
+        btnCol: tk ? '#ffffff' : 'var(--hl-h3d)',
+        btnBd: tk ? 'transparent' : 'var(--hl-h3)',
+        rowBd: missed ? 'color-mix(in srgb,#dc2626 40%,transparent)' : 'transparent',
+        onSkip: () => skip(d.id),
         onToggle: () => toggle(d.id)
       };
     };
@@ -1357,10 +1377,19 @@ class Component extends DCLogic {
     const clinicsArr = M.clinicTotals(visits);
     const maxClinic = Math.max(...clinicsArr.map(c => c.total), 1);
     const formMedsVM = st.formMeds.map((m, i) => this.medFormVM(m, i));
+    const fm = st.formMissing || [];
+    const ERR = '#dc2626';
+    const ring = c => c === ERR ? '0 0 0 3px color-mix(in srgb,#dc2626 22%,transparent)' : 'none';
+    const miss = {
+      date: fm.indexOf('date') >= 0 && !st.fDate ? ERR : 'var(--hl-line)',
+      clinic: fm.indexOf('clinic') >= 0 && !st.fClinic.trim() ? ERR : 'var(--hl-line)',
+      concern: fm.indexOf('health concern') >= 0 && !st.fConcern.trim() ? ERR : 'var(--hl-line)'
+    };
     return {
-      showHome: st.tab === 'home', showVisits: st.tab === 'visits',
-      showSchedule: st.tab === 'schedule', showExpenses: st.tab === 'expenses',
-      showToday: st.tab === 'today', ...this.todayVals(),
+      showHome: booted && st.tab === 'home', showVisits: booted && st.tab === 'visits',
+      showSchedule: booted && st.tab === 'schedule', showExpenses: booted && st.tab === 'expenses',
+      showToday: booted && st.tab === 'today', ...this.todayVals(),
+      loading: !booted,
       navTabs, quickActions, timeline,
       navDisplay: st.narrow ? 'none' : 'flex',
       narrowNav: !!st.narrow,
@@ -1439,10 +1468,20 @@ class Component extends DCLogic {
       formMeds: formMedsVM,
       addMed: () => this.setState({ formMeds: [...st.formMeds, this.emptyMed()] }),
       formError: st.formError || false,
+      refDate: this.refDate, refClinic: this.refClinic, refConcern: this.refConcern,
+      bdDate: miss.date, bdClinic: miss.clinic, bdConcern: miss.concern,
+      ringDate: ring(miss.date), ringClinic: ring(miss.clinic), ringConcern: ring(miss.concern),
       curLabel: cur,
       saveVisit: () => {
-        if (!st.fClinic.trim() || !st.fConcern.trim() || !st.fDate) {
-          this.setState({ formError: 'Date, clinic and health concern are required.' });
+        const missing = [];
+        if (!st.fDate) missing.push('date');
+        if (!st.fClinic.trim()) missing.push('clinic');
+        if (!st.fConcern.trim()) missing.push('health concern');
+        if (missing.length) {
+          const lbl = missing.length === 1 ? missing[0] : missing.slice(0, -1).join(', ') + ' and ' + missing[missing.length - 1];
+          this.setState({ formError: 'Please fill in the ' + lbl + '.', formMissing: missing });
+          const first = missing[0] === 'date' ? this.refDate : missing[0] === 'clinic' ? this.refClinic : this.refConcern;
+          setTimeout(() => { if (first && first.current) first.current.focus(); }, 50);
           return;
         }
         const nv = {
@@ -1460,7 +1499,7 @@ class Component extends DCLogic {
   }
   openModal() {
     this.setState({
-      modalOpen: true, formError: '',
+      modalOpen: true, formError: '', formMissing: [],
       fDate: this.M ? this.M.todayISO() : '', fClinic: '', fDoctor: '', fConcern: '', fNotes: '', fFollowUp: '',
       fConsult: '', fMeds: '', fOther: '', formMeds: [this.emptyMed()]
     });
