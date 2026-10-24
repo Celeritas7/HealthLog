@@ -1140,7 +1140,6 @@ class Component extends DCLogic {
       const log = R.rebase(r.log, this.state.log || R.emptyLog(), sent);
       this.setState({ log });
       R.cacheSave(log);
-      if (!this._starters) this._starters = await R.ensureStarterRules(S.client());
       const warn = await R.fetchWarnings(S.client(), s.user.id);
       if (warn) this.setState({ warn });
     } else console.warn('[HealthLog] log sync failed:', r.msg);

@@ -140,24 +140,22 @@ export function removeRemedy(log, id) { return { ...log, remedies: touch(log.rem
 
 // ---------- evening weather notes (healthlog_alert_events, written at 18:00 JST) ----------
 // The newest run's lines (max 3), shown until the next run replaces them.
+// Lines are symptom-tied rules plus the hub's risk flags (R046).
 export async function fetchWarnings(sb, uid) {
   const since = new Date(Date.now() - 24 * 3600e3).toISOString();
-  const r = await sb.from('healthlog_alert_events').select('run_date,rank,line,weather_key')
+  const r = await sb.from('healthlog_alert_events').select('run_date,rank,line,weather_key,season')
     .eq('user_id', uid).gte('created_at', since)
     .order('run_date', { ascending: false }).order('rank', { ascending: true });
   if (r.error) return null;
   const rows = r.data || [];
   const runDate = rows.length ? rows[0].run_date : '';
-  return { runDate, lines: rows.filter(x => x.run_date === runDate).map(x => x.line) };
-}
-// New users get the four starter rules (server side adds them only when the user has none).
-export async function ensureStarterRules(sb) {
-  try { const r = await sb.rpc('healthlog_add_starter_rules'); return !r.error; } catch (e) { return false; }
+  const run = rows.filter(x => x.run_date === runDate);
+  return { runDate, lines: run.map(x => x.line), season: (run.find(x => x.season) || {}).season || '' };
 }
 export function warningKey(w) { return 'warnings:' + w.runDate; }
 export function warningItems(log, w) {
   if (!w || !w.lines || !w.lines.length || isDismissed(log, warningKey(w))) return [];
-  return [{ type: 'warning', key: warningKey(w), runDate: w.runDate, title: 'Weather note for tomorrow', sub: 'From the 18:00 check', lines: w.lines }];
+  return [{ type: 'warning', key: warningKey(w), runDate: w.runDate, title: 'Weather note for tomorrow', sub: w.season ? 'Season: ' + w.season : 'From the 18:00 check', lines: w.lines }];
 }
 
 // ---------- inbox ----------
@@ -351,9 +349,10 @@ export function rebase(server, live, sent) {
   };
 }
 
-// Everything of this user's in the log tables; alert events go with their rules.
+// Everything of this user's in the log tables. Hub-flag events have no rule
+// to cascade from, so events are deleted directly.
 export async function deleteAll(sb, uid) {
-  for (const t of ['healthlog_food_remedies', 'healthlog_symptoms', 'healthlog_dismissals', 'healthlog_alert_rules']) {
+  for (const t of ['healthlog_food_remedies', 'healthlog_symptoms', 'healthlog_dismissals', 'healthlog_alert_events', 'healthlog_alert_rules']) {
     const r = await sb.from(t).delete().eq('user_id', uid);
     if (r.error) throw r.error;
   }

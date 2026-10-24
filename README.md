@@ -67,20 +67,20 @@ Rows sync on `(user_id, local_id)` like visits; the device cache is `healthlog-l
 
 ### Evening weather warnings
 
-`sql/migrations/20261024_healthlog_weather_warnings.sql` adds `healthlog_alert_rules`,
-`healthlog_alert_events` and `healthlog_warnings_run()`; `…_healthlog_warnings_cron.sql`
-schedules it as pg_cron job `healthlog-warnings` at 09:00 UTC (18:00 JST).
+pg_cron job `healthlog-warnings` runs `healthlog_warnings_run()` at 09:00 UTC (18:00 JST).
+Migrations: `sql/migrations/20261024_healthlog_weather_warnings.sql`, `…_warnings_cron.sql`,
+then `…_warnings_r046.sql` (Akatsuki R046). The first two are applied; R046 is
+written and tested but **not yet applied** to the project.
 
-- Forecast from `akatsuki_weather` (key `here` while fresh, else `place:home`), history
-  from `akatsuki_weather_daily` — read only. Writes `healthlog_*` only.
-- Rules compare one field (or `temp_gap` / `pressure_change` / `tmax_change`) against a
-  threshold for tomorrow (or today). Rules tied to a symptom only fire while it is open
-  and are listed first; then `priority`. At most 3 lines per evening, e.g.
-  `[Tomorrow · Home] Dry air: min humidity 32% (today 58%). Warm drinks, mask outside.`
-- Four starter rules per user; the app calls `healthlog_add_starter_rules()` after
-  sign-in, which adds them only if the user has no rules.
-- The note shows in the app's inbox until the next run; no push yet.
-See `docs/healthlog-food-remedy-weather-brief.md` for the full brief.
+- Tomorrow's place comes from `akatsuki_weather` key `plan` (`days[].at`: home / office),
+  else `place:home`. Today's from `here` while fresh, else `place:home`. Read only;
+  writes `healthlog_*` only.
+- General lines are the hub's `days[].risk` flags (same as Calendar and Setu) with a
+  Health Log tip; `healthlog_alert_rules` holds only symptom-tied rules, using the hub's
+  field names, which fire while that symptom is open and are listed first.
+- At most 3 lines per evening, e.g.
+  `[Tomorrow · Home] Temperature +7.5 °C vs the day before. Carry a layer.`
+  The hub season is shown as the note's subtitle. In-app inbox only; no push yet.
 
 ## Themes
 

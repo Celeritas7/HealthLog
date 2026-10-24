@@ -2,6 +2,10 @@
 
 From Aniket, via Akatsuki. Confirmed 2026-10-24 (see "Confirmed decisions" below).
 
+> **Revised by Akatsuki R046 (2026-10-24)** — general warnings now come from the hub, and
+> "tomorrow" reads key `plan`. Where §1–2 and R046 differ, R046 wins; see the
+> "R046 changes" section at the end.
+
 ## 1. Alert rules (table `healthlog_alert_rules`)
 
 Columns:
@@ -80,11 +84,12 @@ read, not as a separate step.
   Sudden heat — "Drink more water, lighter clothes".
 - **`{value}` for change fields** is shown as a size ("falls 7 hPa", "+7 °C").
 - **Starter rules**: seeded for every existing Health Log user; the app adds them for a
-  user who has no rules at all.
+  user who has no rules at all. *(Superseded by R046: removed.)*
 - **`day = 0` change fields**: today minus yesterday.
 - **Warning lifetime**: shown in the inbox until the next 18:00 run.
 - **Priority**: rules tied to an open symptom first, then a `priority` column (starters
-  1–4 in the order above), then how far past the threshold.
+  1–4 in the order above), then how far past the threshold. *(R046: tied rules, then hub
+  `high`, then hub `watch`.)*
 - **Setu line and `akatsuki_places`**: deferred together until the hub says the Setu
   near-a-place RPC is live. Part 1 does not read `akatsuki_places`.
 - **Correlation-suggested rules**: later, not v1.
@@ -102,3 +107,41 @@ read, not as a separate step.
   near-a-place RPC until the hub says it's live.
 - After applying: report the migration name, the cron job name and schedule, and the
   result of one run. The hub then flips `weather.now` and `weather.history` to live.
+
+## R046 changes (Akatsuki → Health Log, 2026-10-24)
+
+From the hub:
+
+- General weather warnings now come from the hub: `days[].risk` and `seasons` in
+  `akatsuki_weather`, the same flags Calendar and Setu show. Drop the starter general rules
+  from the alert table. Keep only rules tied to a symptom, using the same field names.
+- For "tomorrow", read key `plan` (office on weekdays, home on weekends); fall back to
+  `place:home` if `plan` is missing.
+- `place:office` now has its own forecast and history (from 2026-10-01).
+
+As built (migration `healthlog_warnings_r046` — not yet applied to the project as of this commit):
+
+- The four starter rules (and the events they had written) are deleted;
+  `healthlog_starter_rules()` / `healthlog_add_starter_rules()` are dropped.
+  `healthlog_alert_rules.symptom` is now required.
+- Rule `field` uses the hub's names: day fields (`rh_min_pct`, `rh_mean_pct`,
+  `pressure_hpa_mean`, `pressure_d24_hpa`, `tmax_c`, `tmin_c`, `feels_max_c`, `precip_mm`,
+  `precip_prob_pct`, `wind_max_ms`, `gust_max_ms`, `uv_max`) and `change` deltas
+  (`d_tmax_c`, `d_tmin_c`, `d_rh_mean_pct`, `d_pressure_hpa`). `temp_gap`,
+  `pressure_change` and `tmax_change` are gone.
+- Tomorrow: `plan`'s `days[].at` picks the label (`Home` / `Office` / `Here`); if `plan`
+  is missing or has no row for tomorrow, `place:home`. Today rules still use `here` while
+  fresh, else `place:home`. "(today …)" comes from that same place's own forecast.
+- Hub lines: `[Tomorrow · Office] <hub reason>. <Health Log tip>.` Tips per risk id:
+  temp_swing "Carry a layer"; day_night "Carry a layer for the evening"; pressure_fall
+  "Take it easy, keep water and any usual remedy handy"; dry "Warm drinks, mask outside,
+  humidifier at night"; heat "Drink more water, lighter clothes"; muggy "Drink water,
+  keep rooms aired"; storm "Check plans before heading out"; tropical_night "Keep the
+  bedroom cool, water by the bed". Unknown ids show the reason only.
+- Both levels (`watch`, `high`) are used. Order: symptom-tied rules, then `high` flags,
+  then `watch` flags (hub order within each). Still at most 3 lines per evening.
+- The season covering tomorrow is the note's subtitle in the inbox
+  ("Season: 秋の寒暖差 · ragweed · dry air begins"); it does not take a line.
+- `healthlog_alert_events` gains `source` (`rule` | `hub`), `risk_id`, `level`, `season`;
+  `rule_id` is null for hub lines; one hub line per risk per evening. Signed-in users may
+  delete their own events (for "Delete my data").
