@@ -12,6 +12,7 @@ daily dose schedule (morning / noon / evening / night), follow-up dates, and exp
 | `HealthLog Desktop v2.dc.html` | Desktop / web app |
 | `HealthLog Mobile v2.dc.html` | Mobile app |
 | `healthlog-data.js` | Shared data model, schedule logic, themes, localStorage persistence |
+| `healthlog-remedies.js` | Symptom log, food remedies, "Did it help?" asks, inbox and merged timeline (shared by both pages) |
 | `support.js` | Runtime the app pages depend on |
 | `supabase/healthlog_schema.sql` | Supabase tables, RLS, and views (all prefixed `healthlog_`) |
 
@@ -47,6 +48,22 @@ switch `user_id` to `auth.uid()` as noted in the SQL comments.
 two functions with supabase-js calls against the tables above; the field names map 1:1
 (visit → `healthlog_visits`, `visit.meds[]` → `healthlog_medicines`, the taken-checkmarks
 map → `healthlog_dose_logs`).
+
+## Symptoms, food remedies and the inbox
+
+The **Log** tab (both apps) records symptoms (`healthlog_symptoms`) and food remedies
+(`healthlog_food_remedies`), and shows them on one timeline with clinic visits.
+
+- **Did it help?** — asked once per remedy, 4 h after it was taken (from `taken_at`,
+  else `time_of_day`, else when it was logged). If that lands after 22:00 or before
+  09:00 it is asked at 09:00. Helped / A bit / No fill `effect` (`good` / `some` /
+  `none`) plus optional `relief_hours`; Skip writes a `healthlog_dismissals` row
+  (`remedy-help:<local_id>`) so it is never asked again.
+- **Inbox** — open "Did it help?" asks (and, from Part 2, the evening weather notes).
+  A count shows on the Log tab and as a banner on Home.
+
+Rows sync on `(user_id, local_id)` like visits; the device cache is `healthlog-log-v1`.
+See `docs/healthlog-food-remedy-weather-brief.md` for the full brief.
 
 ## Themes
 
