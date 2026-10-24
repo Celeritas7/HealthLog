@@ -13,6 +13,9 @@
 //   dismissals: [{ key, date, dirty }]
 // `id` is the row's local_id; symptomId points at a symptom's local id.
 
+import { toMin, fmtTime, dayKey, addDays, daysBetween } from './healthlog-schedule.js';
+export { fmtTime, dayKey };
+
 const CACHE = 'healthlog-log-v1';
 
 export const ASK_AFTER_MIN = 4 * 60;   // ask 4 h after the remedy was taken
@@ -34,16 +37,8 @@ export const SEVERITY = ['mild', 'moderate', 'severe'];
 
 // ---------- small helpers ----------
 const pad = n => String(n).padStart(2, '0');
-export function dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
 function nowHHMM(d) { return pad(d.getHours()) + ':' + pad(d.getMinutes()); }
-function toMin(hhmm) { const p = String(hhmm || '0:0').split(':'); return (+p[0] || 0) * 60 + (+p[1] || 0); }
 function atMin(dateStr, min) { const d = new Date(dateStr + 'T00:00:00'); d.setMinutes(min); return d; }
-function addDays(dateStr, n) { const d = new Date(dateStr + 'T00:00:00'); d.setDate(d.getDate() + n); return dayKey(d); }
-function daysBetween(a, b) { return Math.round((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 86400000); }
-export function fmtTime(hhmm) {
-  const m = toMin(hhmm), h = Math.floor(m / 60);
-  return (h % 12 === 0 ? 12 : h % 12) + ':' + pad(m % 60) + ' ' + (h >= 12 ? 'PM' : 'AM');
-}
 function fmtDay(dateStr) { return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
 function fmtWhen(d) {
   const today = dayKey(new Date()), k = dayKey(d);
@@ -157,7 +152,7 @@ export async function fetchWarnings(sb, uid) {
 }
 // New users get the four starter rules (server side adds them only when the user has none).
 export async function ensureStarterRules(sb) {
-  try { await sb.rpc('healthlog_add_starter_rules'); } catch (e) { }
+  try { const r = await sb.rpc('healthlog_add_starter_rules'); return !r.error; } catch (e) { return false; }
 }
 export function warningKey(w) { return 'warnings:' + w.runDate; }
 export function warningItems(log, w) {
@@ -202,14 +197,16 @@ export function timeline(log, visits, limitDays) {
       items.push({ type: 'symptom-end', id: s.id + ':end', date: s.endedOn, sortT: '23:59', icon: '🌿', title: 'Better: ' + s.symptom, sub: 'after ' + (days === 1 ? '1 day' : days + ' days') });
     }
   });
+  const now = new Date();
   remedies(log).forEach(r => {
     if (r.takenOn < from) return;
     const kind = KINDS.find(k => k.key === r.kind) || KINDS[0];
+    const ask = helpPending(log, r) ? askAt(r) : null;
     items.push({
       type: 'remedy', id: r.id, date: r.takenOn, sortT: r.takenAt || TOD_TIME[(r.timeOfDay || '').toLowerCase()] || '12:00', icon: kind.emoji,
       title: r.name,
       sub: [r.takenAt ? fmtTime(r.takenAt) : r.timeOfDay, r.symptom ? 'for ' + r.symptom : '', r.placeName, r.notes].filter(Boolean).join(' · '),
-      pill: r.effect ? EFFECT_LABEL[r.effect] + (r.reliefHours != null ? ' · ~' + r.reliefHours + ' h' : '') : helpDue(log, r, new Date()) ? 'In your inbox' : helpPending(log, r) && askAt(r) ? 'Ask ' + fmtWhen(askAt(r)) : '',
+      pill: r.effect ? EFFECT_LABEL[r.effect] + (r.reliefHours != null ? ' · ~' + r.reliefHours + ' h' : '') : ask && ask <= now ? 'In your inbox' : ask ? 'Ask ' + fmtWhen(ask) : '',
       tone: r.effect === 'good' ? 'good' : r.effect === 'some' ? 'some' : r.effect === 'none' ? 'muted' : 'info'
     });
   });
@@ -218,7 +215,7 @@ export function timeline(log, visits, limitDays) {
   return Object.keys(byDay).sort().reverse().map(date => ({
     date,
     label: date === today ? 'Today' : date === addDays(today, -1) ? 'Yesterday' : new Date(date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
-    items: byDay[date].sort((a, b) => a.sortT < b.sortT ? 1 : -1)
+    items: byDay[date].sort((a, b) => (a.sortT < b.sortT) - (a.sortT > b.sortT))
   }));
 }
 
@@ -354,10 +351,12 @@ export function rebase(server, live, sent) {
   };
 }
 
+// Everything of this user's in the log tables; alert events go with their rules.
 export async function deleteAll(sb, uid) {
-  await sb.from('healthlog_food_remedies').delete().eq('user_id', uid);
-  await sb.from('healthlog_symptoms').delete().eq('user_id', uid);
-  await sb.from('healthlog_dismissals').delete().eq('user_id', uid);
+  for (const t of ['healthlog_food_remedies', 'healthlog_symptoms', 'healthlog_dismissals', 'healthlog_alert_rules']) {
+    const r = await sb.from(t).delete().eq('user_id', uid);
+    if (r.error) throw r.error;
+  }
   resetLog();
 }
 

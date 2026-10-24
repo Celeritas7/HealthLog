@@ -14,7 +14,8 @@ daily dose schedule (morning / noon / evening / night), follow-up dates, and exp
 | `healthlog-data.js` | Shared data model, schedule logic, themes, localStorage persistence |
 | `healthlog-remedies.js` | Symptom log, food remedies, "Did it help?" asks, inbox and merged timeline (shared by both pages) |
 | `support.js` | Runtime the app pages depend on |
-| `supabase/healthlog_schema.sql` | Supabase tables, RLS, and views (all prefixed `healthlog_`) |
+| `sql/healthlog_schema.sql` | Original Supabase tables, RLS, and views (all prefixed `healthlog_`) |
+| `sql/migrations/` | Later migrations: symptoms + food remedies + dismissals (already applied, kept for reference), weather warnings, cron job |
 
 ## Launch on GitHub Pages
 

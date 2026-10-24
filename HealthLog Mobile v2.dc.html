@@ -913,6 +913,13 @@ class Component extends DCLogic {
       setTimeout(() => this.scrollToNow(), 450);
     });
   }
+  componentWillUnmount() {
+    clearInterval(this._tick); clearTimeout(this._logT);
+  }
+  clearLog() {
+    if (this.R) this.R.resetLog();
+    this.setState({ log: this.R ? this.R.emptyLog() : null, warn: null });
+  }
   scrollToNow() {
     const m = this.mainRef && this.mainRef.current, n = this.nowRef && this.nowRef.current;
     if (m && n) m.scrollTop = Math.max(0, n.getBoundingClientRect().top - m.getBoundingClientRect().top + m.scrollTop - 90);
@@ -955,7 +962,7 @@ class Component extends DCLogic {
       await S.init();
       S.onAuthChange(s => {
         this.setState({ session: s || null, showAuth: !s });
-        if (s) this.doSync(true);
+        if (s) this.doSync(true); else this.clearLog();
       });
       const s = await S.currentSession();
       const cached = S.cacheLoad();
@@ -964,7 +971,7 @@ class Component extends DCLogic {
       }
       this.setState({ session: s || null, showAuth: !s, syncBooted: true });
       if (s) this.doSync(true);
-      else this.setState({ visits: [], taken: {}, log: this.R ? this.R.emptyLog() : null });
+      else { this.setState({ visits: [], taken: {} }); this.clearLog(); }
     }).catch(e => {
       console.error('[HealthLog] sync boot failed:', e);
       this.setState({
@@ -1014,15 +1021,20 @@ class Component extends DCLogic {
   }
   async doSignOut() {
     if (this.S) await this.S.signOut();
+    this.clearLog();
     this.setState({ session: null, showAuth: true, syncOpen: false, authPw: '', authMsg: '' });
   }
   async doDelete() {
     if (!this.S) return;
     if (!this.state.confirmDelete) { this.setState({ confirmDelete: true }); return; }
     const s = this.state.session;
-    if (this.R && s) await this.R.deleteAll(this.S.client(), s.user.id);
+    if (this.R && s) {
+      try { await this.R.deleteAll(this.S.client(), s.user.id); }
+      catch (e) { this.setState({ confirmDelete: false, syncMsg: "Couldn't delete your log: " + ((e && e.message) || e) + '. Nothing was removed — try again.', syncMsgOk: false }); return; }
+    }
     const r = await this.S.deleteMyData();
-    this.setState({ confirmDelete: false, syncOpen: false, visits: [], taken: {}, log: this.R ? this.R.emptyLog() : null, conflicts: [], session: null, showAuth: true, syncMsg: r.msg, syncMsgOk: r.ok });
+    this.clearLog();
+    this.setState({ confirmDelete: false, syncOpen: false, visits: [], taken: {}, conflicts: [], session: null, showAuth: true, syncMsg: r.msg, syncMsgOk: r.ok });
   }
   authVals() {
     const st = this.state, S = this.S;
@@ -1073,8 +1085,8 @@ class Component extends DCLogic {
       acctInitial: ((st.session && st.session.user && st.session.user.email) || '?').charAt(0).toUpperCase(),
       onResetDevice: () => {
         if (this.S && this.S.resetDevice) this.S.resetDevice();
-        if (this.R) this.R.resetLog();
-        this.setState({ visits: [], taken: {}, log: this.R ? this.R.emptyLog() : null, conflicts: [], syncMsg: 'Cleared this device — pulling from the server…', syncMsgOk: true });
+        this.clearLog();
+        this.setState({ visits: [], taken: {}, conflicts: [], syncMsg: 'Cleared this device — pulling from the server…', syncMsgOk: true });
         this.doSync(false);
       },
       onSignOut: () => this.doSignOut(),
@@ -1128,7 +1140,7 @@ class Component extends DCLogic {
       const log = R.rebase(r.log, this.state.log || R.emptyLog(), sent);
       this.setState({ log });
       R.cacheSave(log);
-      if (!this._starters) { this._starters = true; await R.ensureStarterRules(S.client()); }
+      if (!this._starters) this._starters = await R.ensureStarterRules(S.client());
       const warn = await R.fetchWarnings(S.client(), s.user.id);
       if (warn) this.setState({ warn });
     } else console.warn('[HealthLog] log sync failed:', r.msg);
