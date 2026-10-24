@@ -68,6 +68,13 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:var(--hl-date-filte
             <div style="flex:1;font-size:0.85rem;font-weight:600;">{{ missedText }}</div>
           </div>
         </sc-if>
+        <sc-if value="{{ hasInbox }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ goLog }}" style="cursor:pointer;display:flex;align-items:center;gap:12px;background:color-mix(in srgb,var(--hl-h1) 10%,transparent);border:1px solid color-mix(in srgb,var(--hl-h1) 40%,transparent);border-radius:14px;padding:12px 16px;color:var(--hl-h1d);">
+            <span style="font-size:1.1rem;">📥</span>
+            <div style="flex:1;font-size:0.85rem;font-weight:600;">{{ inboxBannerText }}</div>
+            <span style="font-size:0.8rem;opacity:.9;">Open ›</span>
+          </div>
+        </sc-if>
         <div style="height:8px;background:var(--hl-rail);border-radius:4px;overflow:hidden;">
           <div style="height:100%;width:{{ takenPct }}%;background:linear-gradient(90deg,var(--hl-h3),var(--hl-h1));border-radius:4px;transition:all .3s ease;"></div>
         </div>
@@ -369,6 +376,114 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:var(--hl-date-filte
         <button onClick="{{ openAdd }}" style="align-self:stretch;min-height:46px;border-radius:35px;border:1px dashed var(--hl-line);background:var(--hl-card);color:var(--hl-h3);cursor:pointer;font-family:inherit;font-size:0.82rem;font-weight:600;">＋ Add a visit &amp; prescription</button>
       </div>
     </sc-if>
+    <sc-if value="{{ showLog }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Log" style="display:flex;flex-direction:column;gap:14px;animation:fadeIn .3s ease;">
+        <div style="background:var(--hl-card);border:1px solid var(--hl-line);border-radius:20px;padding:20px;box-shadow:var(--hl-card-shadow);display:flex;flex-direction:column;gap:12px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">📥 Inbox</div>
+            <sc-if value="{{ hasInbox }}" hint-placeholder-val="{{ true }}">
+              <span style="min-width:20px;height:20px;border-radius:10px;background:#dc2626;color:#ffffff;font-size:0.68rem;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 6px;">{{ inboxCount }}</span>
+            </sc-if>
+          </div>
+          <sc-if value="{{ noInbox }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:0.85rem;color:var(--hl-muted);line-height:1.5;">Nothing waiting. Evening weather notes and "Did it help?" questions show up here.</div>
+          </sc-if>
+          <sc-for list="{{ inbox }}" as="it" hint-placeholder-count="1">
+            <div style="background:var(--hl-rail);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px;">
+              <div style="display:flex;align-items:flex-start;gap:10px;">
+                <span style="font-size:1.1rem;flex-shrink:0;">{{ it.icon }}</span>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-size:0.92rem;font-weight:600;line-height:1.35;">{{ it.title }}</div>
+                  <div style="font-size:0.76rem;color:var(--hl-label);margin-top:3px;line-height:1.4;">{{ it.sub }}</div>
+                </div>
+              </div>
+              <sc-if value="{{ it.isHelp }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;flex-direction:column;gap:10px;">
+                  <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                    <sc-for list="{{ it.answers }}" as="a" hint-placeholder-count="3">
+                      <button onClick="{{ a.onPick }}" style="min-height:40px;padding:8px 16px;border-radius:35px;border:1px solid var(--hl-h1);background:var(--hl-card);color:var(--hl-h1d);cursor:pointer;font-family:inherit;font-size:0.82rem;font-weight:600;">{{ a.label }}</button>
+                    </sc-for>
+                    <button onClick="{{ it.onSkip }}" style="min-height:40px;padding:8px 16px;border-radius:35px;border:1px solid var(--hl-line);background:transparent;color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:0.82rem;font-weight:600;">Skip</button>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:0.78rem;color:var(--hl-label);">
+                    <span>Relief lasted about</span>
+                    <input type="number" min="0" step="0.5" value="{{ it.hours }}" onChange="{{ it.onHours }}" placeholder="–" style="width:70px;padding:8px 10px;border-radius:10px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-text);font-size:0.85rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h1);">
+                    <span>hours (optional, before you answer)</span>
+                  </div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ it.isWarning }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                  <sc-for list="{{ it.lines }}" as="ln" hint-placeholder-count="2">
+                    <div style="font-size:0.85rem;line-height:1.45;color:var(--hl-text);">{{ ln.text }}</div>
+                  </sc-for>
+                  <sc-if value="{{ it.hasNearby }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-radius:12px;background:var(--hl-card);border:1px solid var(--hl-line);">
+                      <div style="font-size:0.85rem;line-height:1.45;color:var(--hl-text);">🍲 {{ it.nearbyText }}</div>
+                      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                        <sc-if value="{{ it.hasMap }}" hint-placeholder-val="{{ false }}">
+                          <a href="{{ it.mapLink }}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;min-height:34px;padding:6px 13px;border-radius:35px;border:1px solid var(--hl-line);color:var(--hl-h2);font-size:0.78rem;font-weight:600;">Map</a>
+                        </sc-if>
+                        <button onClick="{{ it.onLogNearby }}" style="min-height:34px;padding:6px 13px;border-radius:35px;border:1px solid var(--hl-h1);background:transparent;color:var(--hl-h1d);cursor:pointer;font-family:inherit;font-size:0.78rem;font-weight:600;">Log it as a remedy</button>
+                      </div>
+                    </div>
+                  </sc-if>
+                  <button onClick="{{ it.onDismiss }}" style="align-self:flex-start;min-height:38px;padding:7px 15px;border-radius:35px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:0.8rem;font-weight:600;">Got it</button>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+        <div style="background:var(--hl-card);border:1px solid var(--hl-line);border-radius:20px;padding:20px;box-shadow:var(--hl-card-shadow);display:flex;flex-direction:column;gap:12px;">
+          <div style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">✍️ Log</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button onClick="{{ onAddSymptom }}" style="flex:1;min-width:150px;min-height:48px;padding:10px 14px;border-radius:14px;border:1px solid var(--hl-line);background:var(--hl-rail);color:var(--hl-text);cursor:pointer;font-family:inherit;font-size:0.9rem;font-weight:600;" style-hover="border-color:var(--hl-h4);">🤒 Symptom</button>
+            <button onClick="{{ onAddRemedy }}" style="flex:1;min-width:150px;min-height:48px;padding:10px 14px;border-radius:14px;border:1px solid var(--hl-line);background:var(--hl-rail);color:var(--hl-text);cursor:pointer;font-family:inherit;font-size:0.9rem;font-weight:600;" style-hover="border-color:var(--hl-h1);">🍵 Food remedy</button>
+          </div>
+          <div style="font-size:0.78rem;color:var(--hl-label);">{{ openSymptomsLabel }}</div>
+        </div>
+        <div style="background:var(--hl-card);border:1px solid var(--hl-line);border-radius:20px;padding:20px;box-shadow:var(--hl-card-shadow);display:flex;flex-direction:column;gap:14px;">
+          <div>
+            <div style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">🗓 Timeline</div>
+            <div style="font-size:0.78rem;color:var(--hl-muted);margin-top:3px;">Visits, symptoms and food remedies, newest first</div>
+          </div>
+          <sc-if value="{{ logEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:0.85rem;color:var(--hl-muted);">Nothing logged in this period yet.</div>
+          </sc-if>
+          <sc-for list="{{ logTimeline }}" as="g" hint-placeholder-count="3">
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="font-size:0.78rem;font-weight:700;color:var(--hl-label);padding-bottom:4px;border-bottom:1px solid var(--hl-line);">{{ g.label }}</div>
+              <sc-for list="{{ g.items }}" as="i" hint-placeholder-count="2">
+                <div style="display:flex;align-items:flex-start;gap:10px;padding:6px 2px;">
+                  <span style="font-size:1rem;flex-shrink:0;width:24px;text-align:center;">{{ i.icon }}</span>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:0.9rem;font-weight:600;line-height:1.35;">{{ i.title }}</div>
+                    <sc-if value="{{ i.sub }}" hint-placeholder-val="{{ true }}">
+                      <div style="font-size:0.76rem;color:var(--hl-label);margin-top:2px;line-height:1.4;">{{ i.sub }}</div>
+                    </sc-if>
+                    <sc-if value="{{ i.hasIngredients }}" hint-placeholder-val="{{ false }}">
+                      <div style="font-size:0.74rem;color:var(--hl-muted);margin-top:2px;line-height:1.4;">{{ i.ingredients }}</div>
+                    </sc-if>
+                    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px;">
+                      <sc-if value="{{ i.hasPill }}" hint-placeholder-val="{{ false }}">
+                        <span style="font-size:0.68rem;font-weight:700;padding:3px 9px;border-radius:35px;background:{{ i.pillBg }};color:{{ i.pillCol }};">{{ i.pill }}</span>
+                      </sc-if>
+                      <sc-if value="{{ i.canEnd }}" hint-placeholder-val="{{ false }}">
+                        <button onClick="{{ i.onEnd }}" style="min-height:30px;padding:4px 11px;border-radius:35px;border:1px solid var(--hl-h3);background:transparent;color:var(--hl-h3d);cursor:pointer;font-family:inherit;font-size:0.72rem;font-weight:600;">Feeling better</button>
+                      </sc-if>
+                    </div>
+                  </div>
+                  <sc-if value="{{ i.canDelete }}" hint-placeholder-val="{{ false }}">
+                    <button onClick="{{ i.onDelete }}" title="Delete" style="flex-shrink:0;min-width:36px;min-height:36px;padding:0 8px;border-radius:10px;border:1px solid var(--hl-line);background:transparent;color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:0.75rem;" style-hover="color:#ef4444;border-color:rgba(239,68,68,.4);">{{ i.delLabel }}</button>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+          <button onClick="{{ onLogMore }}" style="align-self:center;min-height:38px;padding:8px 16px;border-radius:35px;border:1px solid var(--hl-line);background:transparent;color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:0.78rem;font-weight:600;">{{ logMoreLabel }}</button>
+        </div>
+      </div>
+    </sc-if>
   </main>
 
   <sc-if value="{{ detailOpen }}" hint-placeholder-val="{{ false }}">
@@ -605,6 +720,84 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:var(--hl-date-filte
   </div>
 </sc-if>
 
+<sc-if value="{{ logFormOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ onLogClose }}" style="position:fixed;inset:0;z-index:240;display:flex;align-items:flex-end;justify-content:center;background:rgba(10,15,20,.45);font-family:'Outfit',system-ui,sans-serif;color:var(--hl-text);">
+    <div onClick="{{ stopBubble }}" data-screen-label="Log form" style="width:100%;max-width:560px;max-height:90vh;overflow:auto;background:var(--hl-bg);border-radius:20px 20px 0 0;padding:20px 18px 28px 18px;display:flex;flex-direction:column;gap:16px;animation:fadeIn .25s ease;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+        <div style="font-size:1.15rem;font-weight:700;">{{ logFormTitle }}</div>
+        <button onClick="{{ onLogClose }}" style="flex-shrink:0;width:38px;height:38px;border-radius:50%;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:0.95rem;">✕</button>
+      </div>
+      <sc-if value="{{ logFormSymptom }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">What are you feeling?</label>
+            <input type="text" value="{{ lfSymptom }}" onChange="{{ onLfSymptom }}" placeholder="e.g. cough, sore throat, headache" style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-text);font-size:0.95rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h1);">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">Started on</label>
+            <input type="date" value="{{ lfStarted }}" onChange="{{ onLfStarted }}" style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-text);font-size:0.95rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h1);">
+          </div>
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
+            <sc-for list="{{ lfSevBtns }}" as="b" hint-placeholder-count="3">
+              <button onClick="{{ b.onPick }}" style="min-height:40px;padding:8px 15px;border-radius:35px;border:1px solid {{ b.bd }};background:{{ b.bg }};color:{{ b.col }};cursor:pointer;font-family:inherit;font-size:0.82rem;font-weight:600;">{{ b.label }}</button>
+            </sc-for>
+            <button onClick="{{ lfFeverBtn.onPick }}" style="min-height:40px;padding:8px 15px;border-radius:35px;border:1px solid {{ lfFeverBtn.bd }};background:{{ lfFeverBtn.bg }};color:{{ lfFeverBtn.col }};cursor:pointer;font-family:inherit;font-size:0.82rem;font-weight:600;">{{ lfFeverBtn.label }}</button>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ logFormRemedy }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">What did you have?</label>
+            <input type="text" value="{{ lfName }}" onChange="{{ onLfName }}" placeholder="e.g. Ginger-honey drink" style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-text);font-size:0.95rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h1);">
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            <sc-for list="{{ lfKindBtns }}" as="b" hint-placeholder-count="3">
+              <button onClick="{{ b.onPick }}" style="min-height:40px;padding:8px 15px;border-radius:35px;border:1px solid {{ b.bd }};background:{{ b.bg }};color:{{ b.col }};cursor:pointer;font-family:inherit;font-size:0.82rem;font-weight:600;">{{ b.label }}</button>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">For which symptom?</label>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              <sc-for list="{{ lfSymBtns }}" as="b" hint-placeholder-count="2">
+                <button onClick="{{ b.onPick }}" style="min-height:40px;padding:8px 15px;border-radius:35px;border:1px solid {{ b.bd }};background:{{ b.bg }};color:{{ b.col }};cursor:pointer;font-family:inherit;font-size:0.82rem;font-weight:600;">{{ b.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <label style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">Day</label>
+              <input type="date" value="{{ lfTakenOn }}" onChange="{{ onLfTakenOn }}" style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-text);font-size:0.95rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h1);">
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <label style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">Time</label>
+              <input type="time" value="{{ lfTakenAt }}" onChange="{{ onLfTakenAt }}" style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-text);font-size:0.95rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h1);">
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <label style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">Where (optional)</label>
+            <input type="text" value="{{ lfPlace }}" onChange="{{ onLfPlace }}" placeholder="Home, or a restaurant name" style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-text);font-size:0.95rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h1);">
+          </div>
+          <sc-if value="{{ lfAskHint }}" hint-placeholder-val="{{ true }}">
+            <div style="font-size:0.78rem;color:var(--hl-h1d);">{{ lfAskHint }}</div>
+          </sc-if>
+        </div>
+      </sc-if>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <label style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">Notes (optional)</label>
+        <textarea value="{{ lfNotes }}" onChange="{{ onLfNotes }}" rows="2" style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-text);font-size:0.95rem;font-family:inherit;outline:none;resize:vertical;" style-focus="border-color:var(--hl-h1);"></textarea>
+      </div>
+      <sc-if value="{{ lfErr }}" hint-placeholder-val="{{ false }}">
+        <div style="color:#dc2626;font-size:0.85rem;">{{ lfErr }}</div>
+      </sc-if>
+      <div style="display:flex;gap:10px;">
+        <button onClick="{{ onLogClose }}" style="flex:1;min-height:48px;border-radius:14px;border:1px solid var(--hl-line);background:transparent;color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:0.9rem;font-weight:600;">Cancel</button>
+        <button onClick="{{ onLogSave }}" style="flex:2;min-height:48px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--hl-h1),var(--hl-h1d));color:#ffffff;cursor:pointer;font-family:inherit;font-size:0.9rem;font-weight:600;box-shadow:0 8px 24px var(--hl-g1);">Save</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
 <sc-if value="{{ syncOpen }}" hint-placeholder-val="{{ false }}">
   <div onClick="{{ onSyncClose }}" style="position:fixed;inset:0;z-index:250;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(10,15,20,.45);font-family:'Outfit',system-ui,sans-serif;color:var(--hl-text);">
     <div onClick="{{ stopBubble }}" style="width:100%;max-width:360px;background:var(--hl-bg);border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:16px;box-shadow:0 24px 60px rgba(10,15,20,.3);">
@@ -697,6 +890,7 @@ class Component extends DCLogic {
     fDate: '', fClinic: '', fDoctor: '', fConcern: '', fNotes: '', fFollowUp: '',
     session: null, showAuth: false, syncBooted: false, syncBusy: false, syncOpen: false, syncMsg: '', syncMsgOk: false,
     authMode: 'signin', authShowPw: false, authEmail: '', authPw: '', authMsg: '', authMsgOk: false, authBusy: false,
+    log: null, logForm: '', lf: {}, lfErr: '', helpHours: {}, logDays: 30, confirmLogDel: '', warn: null, nearby: null, ingr: {},
     conflicts: [], conflictsOpen: false, confirmDelete: false, sTheme: null, sCurrency: null, sBudget: null,
     fConsult: '', fMeds: '', fOther: '', formMeds: [], formError: '', formMissing: []
   };
@@ -705,6 +899,13 @@ class Component extends DCLogic {
     this.refDate = React.createRef(); this.refClinic = React.createRef(); this.refConcern = React.createRef();
     this.nowRef = React.createRef();
     import('./healthlog-schedule.js').then(s => { this.SCH = s; this.forceUpdate(); });
+    import('./healthlog-remedies.js').then(r => {
+      this.R = r;
+      this.setState({ log: r.cacheLoad() || r.emptyLog() });
+      this.syncLog();
+    });
+    // "Did it help?" asks come due by the clock, so re-render once a minute
+    this._tick = setInterval(() => this.forceUpdate(), 60000);
     import('./healthlog-data.js').then(m => {
       this.M = m;
       m.applyTheme(this.themeName());
@@ -725,6 +926,14 @@ class Component extends DCLogic {
       this.bootSync();
       setTimeout(() => this.scrollToNow(), 450);
     });
+  }
+  componentWillUnmount() {
+    clearInterval(this._tick); clearTimeout(this._logT);
+  }
+  clearLog() {
+    if (this.R) this.R.resetLog();
+    this._home = null;
+    this.setState({ log: this.R ? this.R.emptyLog() : null, warn: null, nearby: null, ingr: {} });
   }
   scrollToNow() {
     const m = this.mainRef && this.mainRef.current, n = this.nowRef && this.nowRef.current;
@@ -768,7 +977,7 @@ class Component extends DCLogic {
       await S.init();
       S.onAuthChange(s => {
         this.setState({ session: s || null, showAuth: !s });
-        if (s) this.doSync(true);
+        if (s) this.doSync(true); else this.clearLog();
       });
       const s = await S.currentSession();
       const cached = S.cacheLoad();
@@ -777,7 +986,7 @@ class Component extends DCLogic {
       }
       this.setState({ session: s || null, showAuth: !s, syncBooted: true });
       if (s) this.doSync(true);
-      else this.setState({ visits: [], taken: {} });
+      else { this.setState({ visits: [], taken: {} }); this.clearLog(); }
     }).catch(e => {
       console.error('[HealthLog] sync boot failed:', e);
       this.setState({
@@ -798,6 +1007,7 @@ class Component extends DCLogic {
         syncBusy: false, syncMsg: quiet ? '' : 'Everything is up to date.', syncMsgOk: true, syncTick: Date.now()
       });
       this.pullSettings();
+      this.syncLog();
     } else {
       this.setState({ syncBusy: false, syncMsg: r.msg, syncMsgOk: false });
     }
@@ -826,12 +1036,19 @@ class Component extends DCLogic {
   }
   async doSignOut() {
     if (this.S) await this.S.signOut();
+    this.clearLog();
     this.setState({ session: null, showAuth: true, syncOpen: false, authPw: '', authMsg: '' });
   }
   async doDelete() {
     if (!this.S) return;
     if (!this.state.confirmDelete) { this.setState({ confirmDelete: true }); return; }
+    const s = this.state.session;
+    if (this.R && s) {
+      try { await this.R.deleteAll(this.S.client(), s.user.id); }
+      catch (e) { this.setState({ confirmDelete: false, syncMsg: "Couldn't delete your log: " + ((e && e.message) || e) + '. Nothing was removed — try again.', syncMsgOk: false }); return; }
+    }
     const r = await this.S.deleteMyData();
+    this.clearLog();
     this.setState({ confirmDelete: false, syncOpen: false, visits: [], taken: {}, conflicts: [], session: null, showAuth: true, syncMsg: r.msg, syncMsgOk: r.ok });
   }
   authVals() {
@@ -883,6 +1100,7 @@ class Component extends DCLogic {
       acctInitial: ((st.session && st.session.user && st.session.user.email) || '?').charAt(0).toUpperCase(),
       onResetDevice: () => {
         if (this.S && this.S.resetDevice) this.S.resetDevice();
+        this.clearLog();
         this.setState({ visits: [], taken: {}, conflicts: [], syncMsg: 'Cleared this device — pulling from the server…', syncMsgOk: true });
         this.doSync(false);
       },
@@ -916,6 +1134,45 @@ class Component extends DCLogic {
       clearTimeout(this._pushT);
       this._pushT = setTimeout(() => { if (this.state.session) this.S.push(payload); }, 1200);
     }
+  }
+  // Symptoms + food remedies: cache now, push to Supabase shortly after.
+  saveLog(log) {
+    this.setState({ log });
+    if (!this.R) return;
+    this.R.cacheSave(log);
+    clearTimeout(this._logT);
+    this._logT = setTimeout(() => this.syncLog(), 1200);
+  }
+  async syncLog() {
+    const R = this.R, S = this.S, s = this.state.session;
+    if (!R || !S || !s) return;
+    if (this._logBusy) { this._logAgain = true; return; }
+    this._logBusy = true;
+    const sent = this.state.log || R.emptyLog();
+    const r = await R.syncLog(S.client(), s.user.id, sent);
+    this._logBusy = false;
+    if (r.ok) {
+      const log = R.rebase(r.log, this.state.log || R.emptyLog(), sent);
+      this.setState({ log });
+      R.cacheSave(log);
+      const warn = await R.fetchWarnings(S.client(), s.user.id);
+      if (warn) this.setState({ warn });
+      // Setu comfort spots near Home, only while a symptom is open; every 30 min at most
+      const L = this.state.log || R.emptyLog();
+      const nb = this.state.nearby;
+      if (R.openSymptoms(L).length && (!nb || Date.now() - nb.at > 30 * 60000)) {
+        if (!this._home) this._home = await R.fetchHome(S.client(), s.user.id);
+        const fresh = this._home ? await R.fetchNearby(S.client(), this._home) : null;
+        if (fresh) this.setState({ nearby: fresh });
+      }
+      // ingredients for remedies linked to a Food Department dish
+      const ids = R.fdDishIds(L).filter(id => !((this.state.ingr || {})[id]));
+      if (ids.length) {
+        const ing = await R.fetchIngredients(S.client(), s.user.id, ids);
+        if (ing) this.setState({ ingr: { ...(this.state.ingr || {}), ...ing } });
+      }
+    } else console.warn('[HealthLog] log sync failed:', r.msg);
+    if (this._logAgain) { this._logAgain = false; this.syncLog(); }
   }
   emptyMed() { return { name: '', dose: '', days: '7', qty: '', freq: 'daily', everyN: '3', weekdays: [new Date().getDay()], times: ['09:00'] }; }
   nextTime(times) {
@@ -1132,7 +1389,7 @@ class Component extends DCLogic {
   }
   renderVals() {
     const stub = () => { };
-    if (!this.M || !this.state.ready) return { ...this.authVals(), navCount: 5, loading: true, openAdd: stub, todayShort: '' };
+    if (!this.M || !this.state.ready) return { ...this.authVals(), showLog: false, hasInbox: false, logFormOpen: false, navCount: 6, loading: true, openAdd: stub, todayShort: '' };
     const M = this.M, st = this.state;
     const booted = !!st.syncBooted && !!this.SCH;
     const cur = st.sCurrency ?? this.props.currency ?? 'USD';
@@ -1164,6 +1421,7 @@ class Component extends DCLogic {
     const TABS = [
       { key: 'home', label: 'Home', emoji: '📋', hue: 1 },
       { key: 'today', label: 'Today', emoji: '⏰', hue: 3 },
+      { key: 'log', label: 'Log', emoji: '📝', hue: 1 },
       { key: 'visits', label: 'Visits', emoji: '🏥', hue: 2 },
       { key: 'schedule', label: 'Schedule', emoji: '💊', hue: 3 },
       { key: 'expenses', label: 'Expenses', emoji: '💰', hue: 4 }
@@ -1207,6 +1465,8 @@ class Component extends DCLogic {
     const missedDoses = doses.filter(d => !takenToday[d.id] && hourNow > slotHour[d.slot] + 2);
     const remaining = doses.filter(d => !takenToday[d.id]).length;
     navTabs.forEach(t => { if (t.key === 'schedule' && remaining > 0) t.badge = String(remaining); });
+    const LV = this.R ? this.R.logVals(this) : {};
+    navTabs.forEach(t => { if (t.key === 'log' && LV.inboxCount) t.badge = String(LV.inboxCount); });
     const openConflicts = (st.conflicts || []).length;
     if (openConflicts > 0) {
       navTabs.push({
@@ -1330,6 +1590,8 @@ class Component extends DCLogic {
       showHome: booted && st.tab === 'home', showVisits: booted && st.tab === 'visits',
       showSchedule: booted && st.tab === 'schedule', showExpenses: booted && st.tab === 'expenses',
       showToday: booted && st.tab === 'today', ...this.todayVals(),
+      showLog: booted && st.tab === 'log', ...LV,
+      goLog: () => this.setState({ tab: 'log' }),
       loading: !booted,
       navTabs, stats,
       greeting,
