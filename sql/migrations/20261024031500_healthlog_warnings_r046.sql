@@ -1,6 +1,8 @@
 -- ============================================================
 -- HealthLog — evening warnings, revised for Akatsuki R046
 -- Migration name: healthlog_warnings_r046
+-- Applied 2026-10-24 ~03:15 UTC from the SQL editor, so it has no row in
+-- supabase_migrations.schema_migrations; this file is its record.
 --
 -- - General warnings now come from the hub: akatsuki_weather days[].risk
 --   (same flags Calendar and Setu show) plus seasons. The starter general

@@ -15,7 +15,7 @@ daily dose schedule (morning / noon / evening / night), follow-up dates, and exp
 | `healthlog-remedies.js` | Symptom log, food remedies, "Did it help?" asks, inbox and merged timeline (shared by both pages) |
 | `support.js` | Runtime the app pages depend on |
 | `sql/healthlog_schema.sql` | Original Supabase tables, RLS, and views (all prefixed `healthlog_`) |
-| `sql/migrations/` | Later migrations: symptoms + food remedies + dismissals (already applied, kept for reference), weather warnings, cron job |
+| `sql/migrations/` | Later migrations, timestamped to match the project's migration history: symptoms + food remedies + dismissals, weather warnings, cron job, R046 |
 
 ## Launch on GitHub Pages
 
@@ -68,8 +68,8 @@ Rows sync on `(user_id, local_id)` like visits; the device cache is `healthlog-l
 ### Evening weather warnings
 
 pg_cron job `healthlog-warnings` runs `healthlog_warnings_run()` at 09:00 UTC (18:00 JST).
-Migrations: `sql/migrations/20261024_healthlog_weather_warnings.sql`, `…_warnings_cron.sql`,
-then `…_warnings_r046.sql` (Akatsuki R046), all applied. R046 was run from the SQL editor,
+Migrations in `sql/migrations/` (run in filename order to rebuild): `…015953_healthlog_weather_warnings.sql`,
+`…020551_healthlog_warnings_cron.sql`, then `…031500_healthlog_warnings_r046.sql` (Akatsuki R046), all applied. R046 was run from the SQL editor,
 so it is not listed in Supabase's migration history.
 
 - Tomorrow's place comes from `akatsuki_weather` key `plan` (`days[].at`: home / office),
