@@ -500,6 +500,11 @@ export function logVals(c) {
     onLogClose: () => c.setState({ logForm: '', lfErr: '' }),
     onLogSave: save,
     lfErr: st.lfErr || false,
+    // the field the error is about turns red, like the visit form
+    lfSymptomBd: st.lfErr && !(lf.symptom || '').trim() ? '#dc2626' : 'var(--hl-line)',
+    lfSymptomRing: st.lfErr && !(lf.symptom || '').trim() ? '0 0 0 3px color-mix(in srgb,#dc2626 22%,transparent)' : 'none',
+    lfNameBd: st.lfErr && !(lf.name || '').trim() ? '#dc2626' : 'var(--hl-line)',
+    lfNameRing: st.lfErr && !(lf.name || '').trim() ? '0 0 0 3px color-mix(in srgb,#dc2626 22%,transparent)' : 'none',
     // symptom form
     lfSymptom: lf.symptom || '', onLfSymptom: e => set({ symptom: e.target.value }),
     lfStarted: lf.startedOn || '', onLfStarted: e => set({ startedOn: e.target.value }),
