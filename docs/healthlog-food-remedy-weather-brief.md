@@ -153,8 +153,25 @@ in Supabase's migration history):
 |---|---|---|
 | `weather.now` (`akatsuki_weather`) | **Live** | `healthlog_warnings_run()`: `plan`, `here`, `place:home`, `place:office` forecasts, risk flags, seasons |
 | `weather.history` (`akatsuki_weather_daily`) | **Live** | `healthlog_warnings_run()`: place time zone every run; yesterday's values for today-rules |
-| `places` (`akatsuki_places`) | Proposed | Not read yet. Report to Akatsuki on the first real read (Home's lat/lng for the Setu call). |
-| `comfort.spots` (Setu near-a-place RPC) | Proposed | Not called yet. Wait for the hub to say it is live, then report the first call. |
+| `places` (`akatsuki_places`) | Proposed → report first read | App, signed in: Home's lat/lng (`id = 'home'`) for the Setu call, once per session while a symptom is open |
+| `comfort.spots` (`setu_comfort_spots_near`) | Proposed → report first call | App, signed in (the RPC is security invoker): spots near Home, at most every 30 min while a symptom is open |
+| `dish.ingredients` (`akatsuki_food_dish_ingredients`, R047) | Proposed → report first read | App, signed in: ingredients for remedies with an `fd_dish_id` |
 
 R046 was applied from the SQL editor, so the project's migration history has no row for it;
 `sql/migrations/20261024031500_healthlog_warnings_r046.sql` is the record.
+
+## Setu Nearby line and dish ingredients (2026-10-24)
+
+The Setu near-a-place RPC was already live (Akatsuki, 10:32 JST) and Food Department is on the
+hub (R047). Both are read by the **app**, signed in — not by the 18:00 job, which has no
+`auth.uid()` while the RPC is security invoker.
+
+- **Nearby line**: while a symptom is open, the app reads Home from `akatsuki_places` and calls
+  `setu_comfort_spots_near(p_lat, p_lng)` (defaults: 2 km, comfort + remedy themes, 6 results;
+  closed places never return, no beef dishes). The nearest spot is added under the evening note:
+  `Nearby: <name>, <distance> — <dish>`, plus "(closes soon)" or "(hours unknown)". It has a
+  Map link and **Log it as a remedy**, which opens the remedy form prefilled (dish, "Eating
+  out", place) and stores `setu_spot_id` (= `setu_food_notes.id`) on the remedy.
+- **Ingredients**: for remedies with an `fd_dish_id`, the timeline shows the dish's ingredients
+  from `akatsuki_food_dish_ingredients`.
+- Any failed call just leaves the line out; nothing here writes to hub tables.

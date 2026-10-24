@@ -519,6 +519,17 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:var(--hl-date-filte
                     <sc-for list="{{ it.lines }}" as="ln" hint-placeholder-count="2">
                       <div style="font-size:0.85rem;line-height:1.45;color:var(--hl-text);">{{ ln.text }}</div>
                     </sc-for>
+                    <sc-if value="{{ it.hasNearby }}" hint-placeholder-val="{{ false }}">
+                      <div style="display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-radius:12px;background:var(--hl-card);border:1px solid var(--hl-line);">
+                        <div style="font-size:0.85rem;line-height:1.45;color:var(--hl-text);">🍲 {{ it.nearbyText }}</div>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                          <sc-if value="{{ it.hasMap }}" hint-placeholder-val="{{ false }}">
+                            <a href="{{ it.mapLink }}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;min-height:34px;padding:6px 13px;border-radius:35px;border:1px solid var(--hl-line);color:var(--hl-h2);font-size:0.78rem;font-weight:600;">Map</a>
+                          </sc-if>
+                          <button onClick="{{ it.onLogNearby }}" style="min-height:34px;padding:6px 13px;border-radius:35px;border:1px solid var(--hl-h1);background:transparent;color:var(--hl-h1d);cursor:pointer;font-family:inherit;font-size:0.78rem;font-weight:600;">Log it as a remedy</button>
+                        </div>
+                      </div>
+                    </sc-if>
                     <button onClick="{{ it.onDismiss }}" style="align-self:flex-start;min-height:38px;padding:7px 15px;border-radius:35px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:0.8rem;font-weight:600;">Got it</button>
                   </div>
                 </sc-if>
@@ -552,6 +563,9 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:var(--hl-date-filte
                       <div style="font-size:0.9rem;font-weight:600;line-height:1.35;">{{ i.title }}</div>
                       <sc-if value="{{ i.sub }}" hint-placeholder-val="{{ true }}">
                         <div style="font-size:0.76rem;color:var(--hl-label);margin-top:2px;line-height:1.4;">{{ i.sub }}</div>
+                      </sc-if>
+                      <sc-if value="{{ i.hasIngredients }}" hint-placeholder-val="{{ false }}">
+                        <div style="font-size:0.74rem;color:var(--hl-muted);margin-top:2px;line-height:1.4;">{{ i.ingredients }}</div>
                       </sc-if>
                       <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px;">
                         <sc-if value="{{ i.hasPill }}" hint-placeholder-val="{{ false }}">
@@ -923,7 +937,7 @@ class Component extends DCLogic {
     fDate: '', fClinic: '', fDoctor: '', fConcern: '', fNotes: '', fFollowUp: '',
     session: null, showAuth: false, syncBooted: false, syncBusy: false, syncOpen: false, syncMsg: '', syncMsgOk: false,
     authMode: 'signin', authShowPw: false, authEmail: '', authPw: '', authMsg: '', authMsgOk: false, authBusy: false,
-    log: null, logForm: '', lf: {}, lfErr: '', helpHours: {}, logDays: 30, confirmLogDel: '', warn: null,
+    log: null, logForm: '', lf: {}, lfErr: '', helpHours: {}, logDays: 30, confirmLogDel: '', warn: null, nearby: null, ingr: {},
     conflicts: [], conflictsOpen: false, confirmDelete: false, sTheme: null, sCurrency: null, sBudget: null,
     fConsult: '', fMeds: '', fOther: '', formMeds: [], formError: '', formMissing: []
   };
@@ -967,7 +981,8 @@ class Component extends DCLogic {
   }
   clearLog() {
     if (this.R) this.R.resetLog();
-    this.setState({ log: this.R ? this.R.emptyLog() : null, warn: null });
+    this._home = null;
+    this.setState({ log: this.R ? this.R.emptyLog() : null, warn: null, nearby: null, ingr: {} });
   }
   scrollToNow() {
     const m = this.mainRef && this.mainRef.current, n = this.nowRef && this.nowRef.current;
@@ -1191,6 +1206,20 @@ class Component extends DCLogic {
       R.cacheSave(log);
       const warn = await R.fetchWarnings(S.client(), s.user.id);
       if (warn) this.setState({ warn });
+      // Setu comfort spots near Home, only while a symptom is open; every 30 min at most
+      const L = this.state.log || R.emptyLog();
+      const nb = this.state.nearby;
+      if (R.openSymptoms(L).length && (!nb || Date.now() - nb.at > 30 * 60000)) {
+        if (!this._home) this._home = await R.fetchHome(S.client(), s.user.id);
+        const fresh = this._home ? await R.fetchNearby(S.client(), this._home) : null;
+        if (fresh) this.setState({ nearby: fresh });
+      }
+      // ingredients for remedies linked to a Food Department dish
+      const ids = R.fdDishIds(L).filter(id => !((this.state.ingr || {})[id]));
+      if (ids.length) {
+        const ing = await R.fetchIngredients(S.client(), s.user.id, ids);
+        if (ing) this.setState({ ingr: { ...(this.state.ingr || {}), ...ing } });
+      }
     } else console.warn('[HealthLog] log sync failed:', r.msg);
     if (this._logAgain) { this._logAgain = false; this.syncLog(); }
   }

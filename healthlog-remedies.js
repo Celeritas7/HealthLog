@@ -112,7 +112,7 @@ export function addRemedy(log, f) {
     symptom: sym ? sym.symptom : (f.symptom || '').trim(), symptomId: sym ? sym.id : '',
     takenOn: f.takenOn, takenAt: f.takenAt || '', timeOfDay: f.takenAt ? todOf(f.takenAt) : '',
     effect: '', reliefHours: null, notes: (f.notes || '').trim(), placeName: (f.placeName || '').trim(),
-    fdDishId: null, setuSpotId: null, createdAt: new Date().toISOString(), source: 'device', dirty: true
+    fdDishId: null, setuSpotId: f.setuSpotId || null, createdAt: new Date().toISOString(), source: 'device', dirty: true
   };
   return { ...log, remedies: [r, ...(log.remedies || [])] };
 }
@@ -158,6 +158,42 @@ export function warningItems(log, w) {
   return [{ type: 'warning', key: warningKey(w), runDate: w.runDate, title: 'Weather note for tomorrow', sub: w.season ? 'Season: ' + w.season : 'From the 18:00 check', lines: w.lines }];
 }
 
+// ---------- hub reads: Home place, Setu comfort spots, dish ingredients ----------
+// Home's lat/lng (akatsuki_places id 'home'); only needed for the Setu call.
+export async function fetchHome(sb, uid) {
+  const r = await sb.from('akatsuki_places').select('lat,lng,label')
+    .eq('user_id', uid).eq('id', 'home').is('retired_at', null).maybeSingle();
+  if (r.error || !r.data || r.data.lat == null || r.data.lng == null) return null;
+  return { lat: r.data.lat, lng: r.data.lng, label: r.data.label || 'Home' };
+}
+// Setu's comfort/remedy spots near Home, open now (closed places never come back).
+// Security invoker: must be called signed in.
+export async function fetchNearby(sb, home) {
+  const r = await sb.rpc('setu_comfort_spots_near', { p_lat: home.lat, p_lng: home.lng });
+  if (r.error) return null;
+  return { at: Date.now(), spots: r.data || [] };
+}
+// Ingredients for the Food Department dishes our remedies point at (fd_dish_id).
+export async function fetchIngredients(sb, uid, dishIds) {
+  if (!dishIds.length) return {};
+  const r = await sb.from('akatsuki_food_dish_ingredients').select('dish_id,ingredient_name,emoji')
+    .eq('user_id', uid).in('dish_id', dishIds);
+  if (r.error) return null;
+  const out = {};
+  dishIds.forEach(id => { out[id] = []; });
+  (r.data || []).forEach(x => { (out[x.dish_id] = out[x.dish_id] || []).push((x.emoji ? x.emoji + ' ' : '') + x.ingredient_name); });
+  return out;
+}
+export function fdDishIds(log) {
+  return [...new Set(remedies(log).map(r => r.fdDishId).filter(Boolean))];
+}
+function fmtDistance(m) { return m < 1000 ? Math.round(m / 10) * 10 + ' m' : (Math.round(m / 100) / 10) + ' km'; }
+// The brief's line: "Nearby: <name>, <distance> — <dish>", plus Setu's open state.
+export function nearbyLine(spot) {
+  const state = spot.open_state === 'closes_soon' ? ' (closes soon)' : spot.open_state === 'unknown' ? ' (hours unknown)' : '';
+  return 'Nearby: ' + spot.name + ', ' + fmtDistance(spot.distance_m || 0) + (spot.suggested_dish ? ' — ' + spot.suggested_dish : '') + state;
+}
+
 // ---------- inbox ----------
 // Today's weather note first, then open "Did it help?" asks.
 export function inboxItems(log, now, warnings) {
@@ -173,7 +209,7 @@ export function inboxItems(log, now, warnings) {
 }
 
 // ---------- merged timeline ----------
-export function timeline(log, visits, limitDays) {
+export function timeline(log, visits, limitDays, ingr) {
   const today = dayKey(new Date());
   const from = limitDays ? addDays(today, -limitDays) : '';
   const items = [];
@@ -204,6 +240,7 @@ export function timeline(log, visits, limitDays) {
       type: 'remedy', id: r.id, date: r.takenOn, sortT: r.takenAt || TOD_TIME[(r.timeOfDay || '').toLowerCase()] || '12:00', icon: kind.emoji,
       title: r.name,
       sub: [r.takenAt ? fmtTime(r.takenAt) : r.timeOfDay, r.symptom ? 'for ' + r.symptom : '', r.placeName, r.notes].filter(Boolean).join(' · '),
+      ingredients: r.fdDishId && ingr && ingr[r.fdDishId] && ingr[r.fdDishId].length ? ingr[r.fdDishId].join(' · ') : '',
       pill: r.effect ? EFFECT_LABEL[r.effect] + (r.reliefHours != null ? ' · ~' + r.reliefHours + ' h' : '') : ask && ask <= now ? 'In your inbox' : ask ? 'Ask ' + fmtWhen(ask) : '',
       tone: r.effect === 'good' ? 'good' : r.effect === 'some' ? 'some' : r.effect === 'none' ? 'muted' : 'info'
     });
@@ -377,12 +414,25 @@ export function logVals(c) {
     info: ['#1d4ed8', '#2563eb'], muted: ['var(--hl-label)', '#64748b']
   };
   const open = openSymptoms(log);
+  const openForm = (kind, prefill) => c.setState({
+    logForm: kind, lfErr: '',
+    lf: kind === 'symptom'
+      ? { symptom: '', startedOn: today, severity: 'mild', fever: false, notes: '' }
+      : { name: '', kind: 'dish', symptomId: open.length ? open[0].id : '', takenOn: today, takenAt: nowHHMM(now), placeName: '', notes: '', ...(prefill || {}) }
+  });
 
   const inbox = inboxItems(log, now, warningItems(log, st.warn)).map(it => {
     if (it.type === 'warning') {
+      const spot = open.length && st.nearby && st.nearby.spots.length ? st.nearby.spots[0] : null;
       return {
         ...it, icon: '🌤️', isHelp: false, isWarning: true,
         lines: it.lines.map((text, i) => ({ text, key: 'l' + i })),
+        hasNearby: !!spot,
+        nearbyText: spot ? nearbyLine(spot) : '',
+        hasMap: !!(spot && spot.map_link), mapLink: (spot && spot.map_link) || '',
+        onLogNearby: () => spot && openForm('remedy', {
+          name: spot.suggested_dish || spot.name, kind: 'restaurant_meal', placeName: spot.name, setuSpotId: spot.setu_spot_id
+        }),
         onDismiss: () => c.saveLog(dismiss(c.state.log, it.key, it.runDate))
       };
     }
@@ -398,13 +448,14 @@ export function logVals(c) {
   });
 
   const days = st.logDays || 30;
-  const tl = timeline(log, st.visits, days).map(g => ({
+  const tl = timeline(log, st.visits, days, st.ingr).map(g => ({
     ...g,
     items: g.items.map(i => {
       const t = pillTone[i.tone] || pillTone.info;
       return {
         ...i,
         hasPill: !!i.pill,
+        hasIngredients: !!i.ingredients,
         pillCol: t[0], pillBg: 'color-mix(in srgb,' + t[1] + ' 12%,transparent)',
         canEnd: i.type === 'symptom' && !!i.open,
         canDelete: i.type === 'symptom' || i.type === 'remedy',
@@ -419,12 +470,6 @@ export function logVals(c) {
     })
   }));
 
-  const openForm = kind => c.setState({
-    logForm: kind, lfErr: '',
-    lf: kind === 'symptom'
-      ? { symptom: '', startedOn: today, severity: 'mild', fever: false, notes: '' }
-      : { name: '', kind: 'dish', symptomId: open.length ? open[0].id : '', takenOn: today, takenAt: nowHHMM(now), placeName: '', notes: '' }
-  });
   const save = () => {
     if (st.logForm === 'symptom') {
       if (!(lf.symptom || '').trim()) { c.setState({ lfErr: 'What are you feeling? Add a word or two.' }); return; }

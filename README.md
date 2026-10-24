@@ -81,6 +81,10 @@ so it is not listed in Supabase's migration history.
 - At most 3 lines per evening, e.g.
   `[Tomorrow · Home] Temperature +7.5 °C vs the day before. Carry a layer.`
   The hub season is shown as the note's subtitle. In-app inbox only; no push yet.
+- While a symptom is open, the app adds a Setu **Nearby** line under the note
+  (`setu_comfort_spots_near`, Home from `akatsuki_places`); "Log it as a remedy" stores
+  `setu_spot_id`. Remedies with an `fd_dish_id` show the dish's ingredients from
+  `akatsuki_food_dish_ingredients`.
 
 ## Themes
 
