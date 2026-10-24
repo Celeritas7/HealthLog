@@ -63,6 +63,22 @@ The **Log** tab (both apps) records symptoms (`healthlog_symptoms`) and food rem
   A count shows on the Log tab and as a banner on Home.
 
 Rows sync on `(user_id, local_id)` like visits; the device cache is `healthlog-log-v1`.
+
+### Evening weather warnings
+
+`sql/migrations/20261024_healthlog_weather_warnings.sql` adds `healthlog_alert_rules`,
+`healthlog_alert_events` and `healthlog_warnings_run()`; `…_healthlog_warnings_cron.sql`
+schedules it as pg_cron job `healthlog-warnings` at 09:00 UTC (18:00 JST).
+
+- Forecast from `akatsuki_weather` (key `here` while fresh, else `place:home`), history
+  from `akatsuki_weather_daily` — read only. Writes `healthlog_*` only.
+- Rules compare one field (or `temp_gap` / `pressure_change` / `tmax_change`) against a
+  threshold for tomorrow (or today). Rules tied to a symptom only fire while it is open
+  and are listed first; then `priority`. At most 3 lines per evening, e.g.
+  `[Tomorrow · Home] Dry air: min humidity 32% (today 58%). Warm drinks, mask outside.`
+- Four starter rules per user; the app calls `healthlog_add_starter_rules()` after
+  sign-in, which adds them only if the user has no rules.
+- The note shows in the app's inbox until the next run; no push yet.
 See `docs/healthlog-food-remedy-weather-brief.md` for the full brief.
 
 ## Themes

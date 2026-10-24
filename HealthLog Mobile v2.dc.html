@@ -412,6 +412,14 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:var(--hl-date-filte
                   </div>
                 </div>
               </sc-if>
+              <sc-if value="{{ it.isWarning }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                  <sc-for list="{{ it.lines }}" as="ln" hint-placeholder-count="2">
+                    <div style="font-size:0.85rem;line-height:1.45;color:var(--hl-text);">{{ ln.text }}</div>
+                  </sc-for>
+                  <button onClick="{{ it.onDismiss }}" style="align-self:flex-start;min-height:38px;padding:7px 15px;border-radius:35px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:0.8rem;font-weight:600;">Got it</button>
+                </div>
+              </sc-if>
             </div>
           </sc-for>
         </div>
@@ -868,7 +876,7 @@ class Component extends DCLogic {
     fDate: '', fClinic: '', fDoctor: '', fConcern: '', fNotes: '', fFollowUp: '',
     session: null, showAuth: false, syncBooted: false, syncBusy: false, syncOpen: false, syncMsg: '', syncMsgOk: false,
     authMode: 'signin', authShowPw: false, authEmail: '', authPw: '', authMsg: '', authMsgOk: false, authBusy: false,
-    log: null, logForm: '', lf: {}, lfErr: '', helpHours: {}, logDays: 30, confirmLogDel: '', warnings: [],
+    log: null, logForm: '', lf: {}, lfErr: '', helpHours: {}, logDays: 30, confirmLogDel: '', warn: null,
     conflicts: [], conflictsOpen: false, confirmDelete: false, sTheme: null, sCurrency: null, sBudget: null,
     fConsult: '', fMeds: '', fOther: '', formMeds: [], formError: '', formMissing: []
   };
@@ -1120,6 +1128,9 @@ class Component extends DCLogic {
       const log = R.rebase(r.log, this.state.log || R.emptyLog(), sent);
       this.setState({ log });
       R.cacheSave(log);
+      if (!this._starters) { this._starters = true; await R.ensureStarterRules(S.client()); }
+      const warn = await R.fetchWarnings(S.client(), s.user.id);
+      if (warn) this.setState({ warn });
     } else console.warn('[HealthLog] log sync failed:', r.msg);
     if (this._logAgain) { this._logAgain = false; this.syncLog(); }
   }

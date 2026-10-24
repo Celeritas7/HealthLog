@@ -143,8 +143,30 @@ export function removeSymptom(log, id) {
 }
 export function removeRemedy(log, id) { return { ...log, remedies: touch(log.remedies, id, { deleted: true }) }; }
 
+// ---------- evening weather notes (healthlog_alert_events, written at 18:00 JST) ----------
+// The newest run's lines (max 3), shown until the next run replaces them.
+export async function fetchWarnings(sb, uid) {
+  const since = new Date(Date.now() - 24 * 3600e3).toISOString();
+  const r = await sb.from('healthlog_alert_events').select('run_date,rank,line,weather_key')
+    .eq('user_id', uid).gte('created_at', since)
+    .order('run_date', { ascending: false }).order('rank', { ascending: true });
+  if (r.error) return null;
+  const rows = r.data || [];
+  const runDate = rows.length ? rows[0].run_date : '';
+  return { runDate, lines: rows.filter(x => x.run_date === runDate).map(x => x.line) };
+}
+// New users get the four starter rules (server side adds them only when the user has none).
+export async function ensureStarterRules(sb) {
+  try { await sb.rpc('healthlog_add_starter_rules'); } catch (e) { }
+}
+export function warningKey(w) { return 'warnings:' + w.runDate; }
+export function warningItems(log, w) {
+  if (!w || !w.lines || !w.lines.length || isDismissed(log, warningKey(w))) return [];
+  return [{ type: 'warning', key: warningKey(w), runDate: w.runDate, title: 'Weather note for tomorrow', sub: 'From the 18:00 check', lines: w.lines }];
+}
+
 // ---------- inbox ----------
-// Part 1: open "Did it help?" asks. `warnings` (Part 2) slot in ahead of them.
+// Today's weather note first, then open "Did it help?" asks.
 export function inboxItems(log, now, warnings) {
   const asks = remedies(log).filter(r => helpDue(log, r, now)).map(r => {
     const t = askAt(r);
@@ -358,12 +380,18 @@ export function logVals(c) {
   };
   const open = openSymptoms(log);
 
-  const inbox = inboxItems(log, now, st.warnings || []).map(it => {
-    if (it.type !== 'help') return it;
+  const inbox = inboxItems(log, now, warningItems(log, st.warn)).map(it => {
+    if (it.type === 'warning') {
+      return {
+        ...it, icon: '🌤️', isHelp: false, isWarning: true,
+        lines: it.lines.map((text, i) => ({ text, key: 'l' + i })),
+        onDismiss: () => c.saveLog(dismiss(c.state.log, it.key, it.runDate))
+      };
+    }
     const r = it.remedy, hrs = (st.helpHours || {})[r.id] ?? '';
     const answer = eff => c.saveLog(answerRemedy(c.state.log, r.id, eff, (c.state.helpHours || {})[r.id]));
     return {
-      ...it, icon: '🍵', isHelp: true, isWarning: false,
+      ...it, icon: '🍵', isHelp: true, isWarning: false, lines: [],
       hours: hrs,
       onHours: e => c.setState({ helpHours: { ...(c.state.helpHours || {}), [r.id]: e.target.value } }),
       answers: ANSWERS.map(a => ({ label: a.label, onPick: () => answer(a.effect) })),
