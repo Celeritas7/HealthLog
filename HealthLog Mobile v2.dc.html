@@ -23,6 +23,9 @@
 }
 html,body{margin:0;padding:0;background:var(--hl-bg);height:100%;}
 x-dc{display:block;height:100%;}
+/* support.js renders into #dc-root > .sc-host; without a height the app's 100% resolves to
+   auto, the whole page scrolls and the bottom tab bar drifts off-screen */
+#dc-root,#dc-root>.sc-host{height:100%;}
 *{box-sizing:border-box;}
 a{color:var(--hl-h2);text-decoration:none;}
 a:hover{color:var(--hl-h2d);}
