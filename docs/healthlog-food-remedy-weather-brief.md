@@ -153,9 +153,15 @@ in Supabase's migration history):
 |---|---|---|
 | `weather.now` (`akatsuki_weather`) | **Live** | `healthlog_warnings_run()`: `plan`, `here`, `place:home`, `place:office` forecasts, risk flags, seasons |
 | `weather.history` (`akatsuki_weather_daily`) | **Live** | `healthlog_warnings_run()`: place time zone every run; yesterday's values for today-rules |
-| `places` (`akatsuki_places`) | Proposed → report first read | App, signed in: Home's lat/lng (`id = 'home'`) for the Setu call, once per session while a symptom is open |
-| `comfort.spots` (`setu_comfort_spots_near`) | Proposed → report first call | App, signed in (the RPC is security invoker): spots near Home, at most every 30 min while a symptom is open |
-| `dish.ingredients` (`akatsuki_food_dish_ingredients`, R047) | Proposed → report first read | App, signed in: ingredients for remedies with an `fd_dish_id` |
+| `places` (`akatsuki_places`) | **Live** (first read 03:59:06 UTC) | App, signed in: Home's lat/lng (`id = 'home'`) for the Setu call, once per session while a symptom is open |
+| `comfort.spots` (`setu_comfort_spots_near`) | **Live** (first call 03:59:07 UTC, 2 rows) | App, signed in (the RPC is security invoker): spots near Home, at most every 30 min while a symptom is open |
+| `dish.ingredients` (`akatsuki_food_dish_ingredients`, R047) | **Live** (first read 03:59:08 UTC) | App, signed in: ingredients for remedies with an `fd_dish_id` |
+
+All five routes verified live by Akatsuki on 2026-10-24. Only open hub item: the shared push service.
+
+Note from Akatsuki: the dish-ingredients read selects `ingredient_name` for display. If ingredients are
+ever merged (e.g. a shopping list), select and de-duplicate by `ingredient_id` — names are not unique
+in Food Department.
 
 R046 was applied from the SQL editor, so the project's migration history has no row for it;
 `sql/migrations/20261024031500_healthlog_warnings_r046.sql` is the record.

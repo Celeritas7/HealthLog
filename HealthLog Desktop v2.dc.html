@@ -504,16 +504,15 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:var(--hl-date-filte
                 </div>
                 <sc-if value="{{ it.isHelp }}" hint-placeholder-val="{{ true }}">
                   <div style="display:flex;flex-direction:column;gap:10px;">
+                    <div style="display:flex;align-items:center;gap:10px;font-size:0.8rem;color:var(--hl-label);">
+                      <span style="flex:1;min-width:0;line-height:1.4;">How long did the relief last? <span style="color:var(--hl-muted);">(optional)</span></span>
+                      <input type="number" min="0" step="0.5" value="{{ it.hours }}" onChange="{{ it.onHours }}" placeholder="hours" style="width:88px;flex-shrink:0;min-height:40px;padding:8px 10px;border-radius:10px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-text);font-size:0.85rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h1);">
+                    </div>
                     <div style="display:flex;flex-wrap:wrap;gap:8px;">
                       <sc-for list="{{ it.answers }}" as="a" hint-placeholder-count="3">
-                        <button onClick="{{ a.onPick }}" style="min-height:40px;padding:8px 16px;border-radius:35px;border:1px solid var(--hl-h1);background:var(--hl-card);color:var(--hl-h1d);cursor:pointer;font-family:inherit;font-size:0.82rem;font-weight:600;">{{ a.label }}</button>
+                        <button onClick="{{ a.onPick }}" style="min-height:44px;padding:8px 18px;border-radius:35px;border:1px solid var(--hl-h1);background:var(--hl-card);color:var(--hl-h1d);cursor:pointer;font-family:inherit;font-size:0.84rem;font-weight:600;">{{ a.label }}</button>
                       </sc-for>
-                      <button onClick="{{ it.onSkip }}" style="min-height:40px;padding:8px 16px;border-radius:35px;border:1px solid var(--hl-line);background:transparent;color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:0.82rem;font-weight:600;">Skip</button>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:0.78rem;color:var(--hl-label);">
-                      <span>Relief lasted about</span>
-                      <input type="number" min="0" step="0.5" value="{{ it.hours }}" onChange="{{ it.onHours }}" placeholder="–" style="width:70px;padding:8px 10px;border-radius:10px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-text);font-size:0.85rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h1);">
-                      <span>hours (optional, before you answer)</span>
+                      <button onClick="{{ it.onSkip }}" style="min-height:44px;padding:8px 18px;border-radius:35px;border:1px solid var(--hl-line);background:transparent;color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:0.84rem;font-weight:600;">Skip</button>
                     </div>
                   </div>
                 </sc-if>
@@ -527,13 +526,13 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:var(--hl-date-filte
                         <div style="font-size:0.85rem;line-height:1.45;color:var(--hl-text);">🍲 {{ it.nearbyText }}</div>
                         <div style="display:flex;flex-wrap:wrap;gap:8px;">
                           <sc-if value="{{ it.hasMap }}" hint-placeholder-val="{{ false }}">
-                            <a href="{{ it.mapLink }}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;min-height:34px;padding:6px 13px;border-radius:35px;border:1px solid var(--hl-line);color:var(--hl-h2);font-size:0.78rem;font-weight:600;">Map</a>
+                            <a href="{{ it.mapLink }}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;min-height:44px;padding:6px 15px;border-radius:35px;border:1px solid var(--hl-line);color:var(--hl-h2);font-size:0.78rem;font-weight:600;">Map</a>
                           </sc-if>
-                          <button onClick="{{ it.onLogNearby }}" style="min-height:34px;padding:6px 13px;border-radius:35px;border:1px solid var(--hl-h1);background:transparent;color:var(--hl-h1d);cursor:pointer;font-family:inherit;font-size:0.78rem;font-weight:600;">Log it as a remedy</button>
+                          <button onClick="{{ it.onLogNearby }}" style="min-height:44px;padding:6px 15px;border-radius:35px;border:1px solid var(--hl-h1);background:transparent;color:var(--hl-h1d);cursor:pointer;font-family:inherit;font-size:0.78rem;font-weight:600;">Log it as a remedy</button>
                         </div>
                       </div>
                     </sc-if>
-                    <button onClick="{{ it.onDismiss }}" style="align-self:flex-start;min-height:38px;padding:7px 15px;border-radius:35px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:0.8rem;font-weight:600;">Got it</button>
+                    <button onClick="{{ it.onDismiss }}" style="align-self:flex-start;min-height:44px;padding:7px 17px;border-radius:35px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:0.8rem;font-weight:600;">Got it</button>
                   </div>
                 </sc-if>
               </div>
@@ -575,18 +574,18 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:var(--hl-date-filte
                           <span style="font-size:0.68rem;font-weight:700;padding:3px 9px;border-radius:35px;background:{{ i.pillBg }};color:{{ i.pillCol }};">{{ i.pill }}</span>
                         </sc-if>
                         <sc-if value="{{ i.canEnd }}" hint-placeholder-val="{{ false }}">
-                          <button onClick="{{ i.onEnd }}" style="min-height:30px;padding:4px 11px;border-radius:35px;border:1px solid var(--hl-h3);background:transparent;color:var(--hl-h3d);cursor:pointer;font-family:inherit;font-size:0.72rem;font-weight:600;">Feeling better</button>
+                          <button onClick="{{ i.onEnd }}" style="min-height:40px;padding:4px 13px;border-radius:35px;border:1px solid var(--hl-h3);background:transparent;color:var(--hl-h3d);cursor:pointer;font-family:inherit;font-size:0.72rem;font-weight:600;">Feeling better</button>
                         </sc-if>
                       </div>
                     </div>
                     <sc-if value="{{ i.canDelete }}" hint-placeholder-val="{{ false }}">
-                      <button onClick="{{ i.onDelete }}" title="Delete" style="flex-shrink:0;min-width:36px;min-height:36px;padding:0 8px;border-radius:10px;border:1px solid var(--hl-line);background:transparent;color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:0.75rem;" style-hover="color:#ef4444;border-color:rgba(239,68,68,.4);">{{ i.delLabel }}</button>
+                      <button onClick="{{ i.onDelete }}" title="Delete" style="flex-shrink:0;min-width:44px;min-height:44px;padding:0 8px;border-radius:10px;border:none;background:transparent;color:var(--hl-muted);cursor:pointer;font-family:inherit;font-size:0.8rem;opacity:.7;" style-hover="color:#ef4444;opacity:1;">{{ i.delLabel }}</button>
                     </sc-if>
                   </div>
                 </sc-for>
               </div>
             </sc-for>
-            <button onClick="{{ onLogMore }}" style="align-self:center;min-height:38px;padding:8px 16px;border-radius:35px;border:1px solid var(--hl-line);background:transparent;color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:0.78rem;font-weight:600;">{{ logMoreLabel }}</button>
+            <button onClick="{{ onLogMore }}" style="align-self:center;min-height:44px;padding:8px 18px;border-radius:35px;border:1px solid var(--hl-line);background:transparent;color:var(--hl-label);cursor:pointer;font-family:inherit;font-size:0.78rem;font-weight:600;">{{ logMoreLabel }}</button>
           </div>
       </div>
     </sc-if>
@@ -781,7 +780,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:var(--hl-date-filte
         <div style="display:flex;flex-direction:column;gap:14px;">
           <div style="display:flex;flex-direction:column;gap:6px;">
             <label style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">What are you feeling?</label>
-            <input type="text" value="{{ lfSymptom }}" onChange="{{ onLfSymptom }}" placeholder="e.g. cough, sore throat, headache" style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-text);font-size:0.95rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h1);">
+            <input type="text" value="{{ lfSymptom }}" onChange="{{ onLfSymptom }}" placeholder="e.g. cough, sore throat, headache" style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid {{ lfSymptomBd }};box-shadow:{{ lfSymptomRing }};background:var(--hl-card);color:var(--hl-text);font-size:0.95rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h1);">
           </div>
           <div style="display:flex;flex-direction:column;gap:6px;">
             <label style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">Started on</label>
@@ -799,7 +798,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:var(--hl-date-filte
         <div style="display:flex;flex-direction:column;gap:14px;">
           <div style="display:flex;flex-direction:column;gap:6px;">
             <label style="font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--hl-label);font-weight:600;">What did you have?</label>
-            <input type="text" value="{{ lfName }}" onChange="{{ onLfName }}" placeholder="e.g. Ginger-honey drink" style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--hl-line);background:var(--hl-card);color:var(--hl-text);font-size:0.95rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h1);">
+            <input type="text" value="{{ lfName }}" onChange="{{ onLfName }}" placeholder="e.g. Ginger-honey drink" style="width:100%;padding:12px 14px;border-radius:12px;border:1px solid {{ lfNameBd }};box-shadow:{{ lfNameRing }};background:var(--hl-card);color:var(--hl-text);font-size:0.95rem;font-family:inherit;outline:none;" style-focus="border-color:var(--hl-h1);">
           </div>
           <div style="display:flex;flex-wrap:wrap;gap:8px;">
             <sc-for list="{{ lfKindBtns }}" as="b" hint-placeholder-count="3">
