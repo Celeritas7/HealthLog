@@ -146,3 +146,15 @@ in Supabase's migration history):
 - `healthlog_alert_events` gains `source` (`rule` | `hub`), `risk_id`, `level`, `season`;
   `rule_id` is null for hub lines; one hub line per risk per evening. Signed-in users may
   delete their own events (for "Delete my data").
+
+## Hub routes (as of 2026-10-24)
+
+| Route | Status | Used by |
+|---|---|---|
+| `weather.now` (`akatsuki_weather`) | **Live** | `healthlog_warnings_run()`: `plan`, `here`, `place:home`, `place:office` forecasts, risk flags, seasons |
+| `weather.history` (`akatsuki_weather_daily`) | **Live** | `healthlog_warnings_run()`: place time zone every run; yesterday's values for today-rules |
+| `places` (`akatsuki_places`) | Proposed | Not read yet. Report to Akatsuki on the first real read (Home's lat/lng for the Setu call). |
+| `comfort.spots` (Setu near-a-place RPC) | Proposed | Not called yet. Wait for the hub to say it is live, then report the first call. |
+
+R046 was applied from the SQL editor, so the project's migration history has no row for it;
+`sql/migrations/20261024031500_healthlog_warnings_r046.sql` is the record.
