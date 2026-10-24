@@ -69,8 +69,8 @@ Rows sync on `(user_id, local_id)` like visits; the device cache is `healthlog-l
 
 pg_cron job `healthlog-warnings` runs `healthlog_warnings_run()` at 09:00 UTC (18:00 JST).
 Migrations: `sql/migrations/20261024_healthlog_weather_warnings.sql`, `…_warnings_cron.sql`,
-then `…_warnings_r046.sql` (Akatsuki R046). The first two are applied; R046 is
-written and tested but **not yet applied** to the project.
+then `…_warnings_r046.sql` (Akatsuki R046), all applied. R046 was run from the SQL editor,
+so it is not listed in Supabase's migration history.
 
 - Tomorrow's place comes from `akatsuki_weather` key `plan` (`days[].at`: home / office),
   else `place:home`. Today's from `here` while fresh, else `place:home`. Read only;

@@ -119,7 +119,8 @@ From the hub:
   `place:home` if `plan` is missing.
 - `place:office` now has its own forecast and history (from 2026-10-01).
 
-As built (migration `healthlog_warnings_r046` — not yet applied to the project as of this commit):
+As built (migration `healthlog_warnings_r046`, applied 2026-10-24 from the SQL editor, so not
+in Supabase's migration history):
 
 - The four starter rules (and the events they had written) are deleted;
   `healthlog_starter_rules()` / `healthlog_add_starter_rules()` are dropped.
