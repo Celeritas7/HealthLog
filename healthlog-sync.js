@@ -1,7 +1,7 @@
 // HealthLog <-> Supabase: auth, merge sync, conflicts, local cache.
 export const CFG = {
   url: 'https://wylxvmkcrexwfpjpbhyy.supabase.co',
-  key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind5bHh2bWtjcmV4d2ZwanBiaHl5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg2MzkxMDYsImV4cCI6MjA4NDIxNTEwNn0.6Bxo42hx4jwlJGWnfjiTpiDUsYfc1QLTN3YtrU1efak'
+  key: 'sb_publishable_e3pDOuxIdstaC7s0a680kQ_R10TrAyv'
 };
 
 const CACHE = 'healthlog-v1';
@@ -15,6 +15,8 @@ export async function init() {
     // detectSessionInUrl must be true so OAuth redirects can complete
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: 'healthlog-auth' }
   });
+  // Akatsuki broadcast overlay (script tag in the HealthLog *.dc.html pages).
+  if (typeof window !== 'undefined' && window.AkatsukiBroadcast) window.AkatsukiBroadcast(sb, 'healthlog').start();
   return sb;
 }
 export function client() { return sb; }
