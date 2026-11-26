@@ -91,3 +91,10 @@ so it is not listed in Supabase's migration history.
 Both apps ship 5 switchable themes (Clinical Light, Warm Cream, Lavender Mist, Ocean Teal,
 Midnight) plus currency (USD / INR / EUR) and monthly budget — see the `theme`,
 `currency`, and `monthlyBudget` props in each `.dc.html`.
+
+## Shared-backend archive readiness
+
+The [G0 archive compatibility record](docs/archive-access-readiness.md) explains
+which current clients use the UUID tables and how the separate historical
+archive can be protected without changing those clients. Run the synthetic
+checks with `node --test tests/*.test.mjs`. No hosted changes are made by CI.
