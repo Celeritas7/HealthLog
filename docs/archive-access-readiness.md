@@ -6,7 +6,7 @@ synthetic tests and a CI workflow only. It does not deploy or alter HealthLog.
 
 The Commonplace shared-backend work prepares read-only, verified-owner access
 to the old HealthLog archive. See the
-[Commonplace candidate and acceptance evidence](https://github.com/Celeritas7/Commonplace/blob/fix/g0-healthlog-archive/platform/acceptance/HEALTHLOG-ARCHIVE-READINESS.md).
+[Commonplace candidate and acceptance evidence](https://github.com/Celeritas7/Commonplace/blob/37717af068087600c69d8f4222ea5f624bde6ed4/platform/acceptance/HEALTHLOG-ARCHIVE-READINESS.md).
 
 ## Inspected consumers
 
